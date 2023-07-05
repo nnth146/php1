@@ -1,4 +1,4 @@
-import { readFileAsUrl } from "./support.js";
+import { readFileAsUrl, formatPrice, resolveSuffixPrice } from "./support.js";
 
 $(function () {
     $('#feature_image').on("change", async function () {
@@ -14,6 +14,8 @@ $(function () {
             $(img).attr("class", "ui medium image");
 
             $('#feature_image-preview').append(img);
+        }else{
+            $("#feature_image-name").val("");
         }
     });
 
@@ -34,6 +36,11 @@ $(function () {
                 $('#gallery-preview').append(img);
             }
             $("#gallery-name").val(name.join(", "));
+        }else {
+            $("#gallery-name").val("");
         }
     });
+
+    $("#price").on("input", formatPrice);
+    $("#price").on("change", resolveSuffixPrice);
 });

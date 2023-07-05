@@ -118,7 +118,7 @@
                         <?php endif; ?>
                     </div>
                     <div class="preview" id="feature_image-preview">
-                        <?php if (isset($inputs["feature_image"])): ?>
+                        <?php if (!empty($inputs["feature_image"])): ?>
                             <img src="<?php echo "/php1/" . $inputs["feature_image"] ?>" class="ui medium image">
                             <input type="text" name="old-feature-image" value="void" hidden checked>
                         <?php endif; ?>

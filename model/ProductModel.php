@@ -191,10 +191,9 @@ class ProductModel
             "price" => $product["price"],
         ];
 
-        if (isset($product["feature_image"])) {
+        if(isset($product["feature_image"])) {
             $columns_values["feature_image"] = $product["feature_image"];
         }
-
         $productId = $product["id"];
 
         $this->db->updateWhere($this->table, $columns_values, "id = '$productId'");

@@ -135,8 +135,8 @@ class ProductController
                     "price" => $_POST["price"],
                     "categories" => isset($_POST["category"]) ? $_POST["category"] : [],
                     "tags" => isset($_POST["tag"]) ? $_POST["tag"] : [],
-                    "feature_image" => $this->storeFile($_FILES["feature_image"], "storage/app/images/products/"),
-                    "gallery" => $this->storeFiles($_FILES["gallery"], "storage/app/images/products/")
+                    "feature_image" => $this->storeFile($_FILES["feature_image"], "storage/"),
+                    "gallery" => $this->storeFiles($_FILES["gallery"], "storage/")
                 ];
 
                 $this->model->storeProduct($product);
@@ -195,8 +195,8 @@ class ProductController
                     "old-categories" => isset($oldProduct["categories"]) ? explode(",", $oldProduct["categories"]) : [],
                     "tags" => $_POST["tag"] ?? [],
                     "old-tags" => isset($oldProduct["tags"]) ? explode(",", $oldProduct["tags"]) : [],
-                    "feature_image" => $this->storeFile($_FILES["feature_image"], "storage/app/images/products/"),
-                    "gallery" => $this->storeFiles($_FILES["gallery"], "storage/app/images/products/")
+                    "feature_image" => $this->storeFile($_FILES["feature_image"], "storage/"),
+                    "gallery" => $this->storeFiles($_FILES["gallery"], "storage/")
                 ];
 
                 if (!empty($product["feature_image"])) {
@@ -207,7 +207,7 @@ class ProductController
                     if (!empty($oldProduct["feature_image"])) {
                         unlink($oldProduct["feature_image"]);
                     }
-                } else {
+                } else if(isset($_POST["old-feature-image"])){
                     $product["feature_image"] = null;
                 }
 

@@ -6,8 +6,12 @@ $(function () {
 
     resolvePrice();
 
-    $("div[name=delete-btn]").on("click", function () {
+    $(".mini.modal").modal({
+        detachable:false
+    });
 
+    $("div[name=delete-btn]").on("click", function () {
+        $(this).siblings(".mini.modal").modal("show");
     });
 
     $('#search-btn').on("click", function () {
