@@ -1,3 +1,17 @@
-.input__search {
-    width: 50%;
+.main {
+    padding: 3em;
+    max-width: 65em;
+}
+
+.input__error {
+    padding: 4px;
+    color: red;
+    font-size: 0.9em;
+}
+
+.preview {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    gap: 4px;
 }
