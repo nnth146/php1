@@ -132,7 +132,7 @@
                             </td>
                             <td data-label="Gallery">
                                 <div class="flex flex--gap-4px flex--align-start flex--content-center">
-                                    <?php if (isset($product["gallery"]) && is_array($product["gallery"])): ?>
+                                    <?php if (isset($product["gallery"])): ?>
                                         <?php $gallery = explode("|", $product["gallery"]); ?>
                                         <?php foreach ($gallery as $url): ?>
                                             <img class="ui tiny image" src="<?php echo $url; ?>" alt="No Image">

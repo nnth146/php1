@@ -53,23 +53,19 @@ class ProductController
         $extension = pathinfo($name, PATHINFO_EXTENSION);
         $target_file = $dir . $filename . "_uid_" . uniqid() . ".$extension";
 
-        if (move_uploaded_file($file["tmp_name"], $target_file)) {
+        if (move_uploaded_file($file, $target_file)) {
             return $target_file;
         }
-        return false;
+        return "";
     }
     protected function storeFile($file, $dir)
     {
         $filePath = "";
 
         if (file_exists($file["tmp_name"])) {
-            $path = $this->moveFile($file["tmp_name"], $file["name"], $dir);
-
-            if ($path) {
-                $filePath = $path;
-            }
+            $filePath = $this->moveFile($file["tmp_name"], $file["name"], $dir);
         }
-
+        
         return $filePath;
     }
     protected function storeFiles($files, $dir)
@@ -79,9 +75,7 @@ class ProductController
 
         for ($i = 0; $i < $quantity; $i++) {
             if (file_exists($files["tmp_name"][$i])) {
-                $path = $this->moveFile($files["tmp_name"][$i], $files["name"][$i], $dir);
-
-                if ($path) {
+                if ($path = $this->moveFile($files["tmp_name"][$i], $files["name"][$i], $dir)) {
                     array_push($filePaths, $path);
                 }
             }
@@ -172,14 +166,14 @@ class ProductController
             View::render("404");
             return;
         }
-
+        
         $inputs = array_merge($inputs, [
             "id" => $oldProduct["id"],
             "name" => $_POST["name"] ?? $oldProduct["name"],
             "sku" => $_POST["sku"] ?? $oldProduct["sku"],
             "price" => $_POST["price"] ?? $oldProduct["price"],
-            "category" => $_POST["category"] ?? explode(",", $oldProduct["categories"]),
-            "tag" => $_POST["tag"] ?? explode(",", $oldProduct["tags"]),
+            "category" => $_POST["category"] ?? explode(",", $oldProduct["categoryIds"]),
+            "tag" => $_POST["tag"] ?? explode(",", $oldProduct["tagIds"]),
             "feature_image" => $oldProduct["feature_image"],
             "gallery" => isset($oldProduct["gallery"]) ? explode("|", $oldProduct["gallery"]) : null,
             "categories" => $this->model->getCategories(),
@@ -198,9 +192,7 @@ class ProductController
                     "sku" => $_POST["sku"],
                     "price" => $_POST["price"],
                     "categories" => $_POST["category"] ?? [],
-                    "old-categories" => isset($oldProduct["categories"]) ? explode(",", $oldProduct["categories"]) : [],
                     "tags" => $_POST["tag"] ?? [],
-                    "old-tags" => isset($oldProduct["tags"]) ? explode(",", $oldProduct["tags"]) : [],
                     "feature_image" => $this->storeFile($_FILES["feature_image"], "storage/"),
                     "gallery" => $this->storeFiles($_FILES["gallery"], "storage/")
                 ];

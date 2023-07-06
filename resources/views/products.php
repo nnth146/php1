@@ -77,7 +77,7 @@
                     <?php if (isset($inputs["categories"]) && is_array($inputs["categories"])): ?>
                         <option value="">Choose Category</option>
                         <?php foreach ($inputs["categories"] as $category): ?>
-                            <option value="<?php echo $category["name"]; ?>" <?php echo inArray($inputs['category'] ?? [], $category['name']) ? 'selected' : '' ?>>
+                            <option value="<?php echo $category["id"]; ?>" <?php echo inArray($inputs['category'] ?? [], $category["id"]) ? 'selected' : '' ?>>
                                 <?php echo $category["name"]; ?>
                             </option>
                         <?php endforeach; ?>
@@ -90,7 +90,7 @@
                     <option value="">Choose Tag</option>
                     <?php if (isset($inputs["tags"]) && is_array($inputs["tags"])): ?>
                         <?php foreach ($inputs["tags"] as $tag): ?>
-                            <option value="<?php echo $tag["name"]; ?>" <?php echo inArray($inputs['tag'] ?? [], $tag['name']) ? 'selected' : '' ?>>
+                            <option value="<?php echo $tag["id"]; ?>" <?php echo inArray($inputs['tag'] ?? [], $tag['id']) ? 'selected' : '' ?>>
                                 <?php echo $tag["name"]; ?>
                             </option>
                         <?php endforeach; ?>

@@ -43,6 +43,12 @@ class PdoDB
             return false;
         }
     }
+    protected function mapValuesToStringValues($values)
+    {
+        return array_map(function ($element) {
+            return "'$element'";
+        }, $values);
+    }
     /**
      * Insert record[columns][values] into [table]
      *
@@ -58,9 +64,7 @@ class PdoDB
                 $columns = implode(",", $columns);
             }
 
-            $values = array_map(function ($element) {
-                return "'$element'";
-            }, $values);
+            $values = $this->mapValuesToStringValues($values);
 
             $values = implode(",", $values);
 
@@ -70,6 +74,36 @@ class PdoDB
 
             return true;
         } catch (PDOException $e) {
+            return false;
+        }
+    }
+    public function insertMulti($table, $columns, $arrValues)
+    {
+        try {
+            if (is_array($columns)) {
+                $columns = implode(",", $columns);
+            }
+
+            $length = count($arrValues);
+
+            for ($i = 0; $i < $length; $i++) {
+                $arrValues[$i] = $this->mapValuesToStringValues($arrValues[$i]);
+                $arrValues[$i] = "(" . implode(",", $arrValues[$i]) . ")";
+            }
+
+            $values = implode(",", $arrValues);
+
+            if(empty($values)) {
+                return false;
+            }
+
+            $sql = "INSERT INTO $table($columns) VALUES $values";
+
+            $this->conn->exec($sql);
+
+            return true;
+        } catch (PDOException $e) {
+            var_dump($e->getMessage());
             return false;
         }
     }
@@ -170,21 +204,21 @@ class PdoDB
     }
     public function selectWhere($table, $columns, $where)
     {
-        try{
+        try {
             if (is_array($columns)) {
                 $columns = implode(",", $columns);
             }
-    
+
             $sql = "SELECT $columns FROM $table WHERE $where";
-    
+
             $stmt = $this->conn->prepare($sql);
-    
+
             $stmt->execute();
-    
+
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    
+
             return $stmt->fetchAll();
-        }catch(PDOException $e) {
+        } catch (PDOException $e) {
             return [];
         }
     }

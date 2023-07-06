@@ -26,11 +26,10 @@ function route($controller, $method)
 $action = $_GET["action"] ?? "index";
 
 switch ($action) {
+    case "index":
     case "create":
-        route("ProductController", "create");
-        break;
     case "edit":
-        route("ProductController", "edit");
+        route("ProductController", $action);
         break;
     case "delete":
         route("ProductController", "destroy");
@@ -39,7 +38,6 @@ switch ($action) {
         route("PropertiesController", "create");
         break;
     case "filter":
-    case "index":
         route("ProductController", "index");
         break;
     default:

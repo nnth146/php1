@@ -108,11 +108,19 @@ class ProductModel
         }
         return $sql ?? false;
     }
+    protected function mapWithId($arr, $id)
+    {
+        return array_map(function ($itemId) use ($id) {
+            return [$itemId, $id];
+        }, $arr);
+    }
     public function getProductFromId($id)
     {
         $sql = "SELECT p.*,
                 GROUP_CONCAT(DISTINCT g.image_url SEPARATOR '|') gallery,
+                GROUP_CONCAT(DISTINCT c.id) categoryIds,
                 GROUP_CONCAT(DISTINCT c.name) categories,
+                GROUP_CONCAT(DISTINCT t.id) tagIds,
                 GROUP_CONCAT(DISTINCT t.name) tags
             FROM products p
                 LEFT JOIN category_product cp ON cp.product_id = p.id
@@ -128,10 +136,7 @@ class ProductModel
     }
     public function getSimpleProductFromId($id)
     {
-        $sql = "SELECT id,
-            FROM products
-            where id = '$id'
-            GROUP BY p.id";
+        $sql = "SELECT id FROM products where id = '$id'";
 
         $fetchData = $this->db->query($sql, true);
         return !empty($fetchData) ? $fetchData[0] : null;
@@ -145,51 +150,41 @@ class ProductModel
             "feature_image" => $product["feature_image"]
         ];
 
-        $gallery_columns = [
-            "product_id",
-            "image_url"
-        ];
-
         $this->db->insert($this->table, array_keys($columns_values), array_values($columns_values));
 
         $productId = $this->db->getLastInsertId();
 
-        //Add gallery if exists
-        foreach ($product["gallery"] as $url) {
-            $this->db->insert("gallery", $gallery_columns, [$productId, $url]);
+        if (isset($product["gallery"]) && is_array($product["gallery"])) {
+            $this->db->insertMulti(
+                "gallery",
+                [
+                    "image_url",
+                    "product_id"
+                ],
+                $this->mapWithId($product["gallery"], $productId)
+            );
         }
-        //Add category if exists
-        $category_product_columns = [
-            "category_id",
-            "product_id"
-        ];
 
-        foreach ($product["categories"] as $categoryName) {
-            $category = $this->db->selectWhere("categories", "id", "name = '$categoryName'");
-
-            if (!empty($category)) {
-                $this->db->insert("category_product", $category_product_columns, [$category[0]["id"], $productId]);
-            } else {
-                $this->addCategory(["name" => $categoryName]);
-                $categoryId = $this->db->getLastInsertId();
-                $this->db->insert("category_product", $category_product_columns, [$categoryId, $productId]);
-            }
+        if (isset($product["categories"]) && is_array($product["categories"])) {
+            $this->db->insertMulti(
+                "category_product",
+                [
+                    "category_id",
+                    "product_id"
+                ],
+                $this->mapWithId($product["categories"], $productId)
+            );
         }
-        //Add tag if exists
-        $product_tag_columns = [
-            "product_id",
-            "tag_id"
-        ];
-        foreach ($product["tags"] as $tagName) {
-            $tag = $this->db->selectWhere("tags", "id", "name = '$tagName'");
 
-            if (!empty($tag)) {
-                $this->db->insert("product_tag", $product_tag_columns, [$productId, $tag[0]["id"]]);
-            } else {
-                $this->addTag(["name" => $tagName]);
-                $tagId = $this->db->getLastInsertId();
-                $this->db->insert("product_tag", $product_tag_columns, [$productId, $tagId]);
-            }
+        if (isset($product["tags"]) && is_array($product["tags"])) {
+            $this->db->insertMulti(
+                "product_tag",
+                [
+                    "tag_id",
+                    "product_id"
+                ],
+                $this->mapWithId($product["tags"], $productId)
+            );
         }
         return true;
     }
@@ -208,76 +203,49 @@ class ProductModel
 
         $this->db->updateWhere($this->table, $columns_values, "id = '$productId'");
 
-        if (isset($product["gallery"])) {
-            $this->db->deleteWhere("gallery", "product_id = '$productId'");
-
-            foreach ($product["gallery"] as $url) {
-                $this->db->insert(
-                    "gallery",
-                    [
-                        "product_id",
-                        "image_url"
-                    ],
-                    [$productId, $url]
-                );
-            }
+        if (isset($product["gallery"]) && is_array($product["gallery"])) {
+            $this->updateProductSubTable(
+                "gallery",
+                [
+                    "image_url",
+                    "product_id"
+                ],
+                $this->mapWithId($product["gallery"], $productId),
+                $productId
+            );
         }
 
-        $this->updateProductCategory(
-            array_diff($product["categories"], $product["old-categories"]),
-            array_diff($product["old-categories"], $product["categories"]),
-            $productId
-        );
-
-        $this->updateProductTag(
-            array_diff($product["tags"], $product["old-tags"]),
-            array_diff($product["old-tags"], $product["tags"]),
-            $productId
-        );
-
-        return true;
-    }
-    private function updateProductCategory($add, $remove, $productId)
-    {
-        foreach ($add as $categoryName) {
-            $category = $this->db->selectWhere("categories", "id", "name = '$categoryName'");
-            $this->db->insert(
+        if (isset($product["categories"]) && is_array($product["categories"])) {
+            $this->updateProductSubTable(
                 "category_product",
                 [
                     "category_id",
                     "product_id"
                 ],
-                [$category[0]["id"], $productId]
+                $this->mapWithId($product["categories"], $productId),
+                $productId
             );
         }
-        foreach ($remove as $categoryName) {
-            $category = $this->db->selectWhere("categories", "id", "name = '$categoryName'");
-            $this->db->deleteWhere(
-                "category_product",
-                " category_id = " . $category[0]["id"] . " AND product_id = $productId"
-            );
-        }
-    }
-    private function updateProductTag($add, $remove, $productId)
-    {
-        foreach ($add as $tagName) {
-            $tag = $this->db->selectWhere("tags", "id", "name = '$tagName'");
-            $this->db->insert(
+
+        if (isset($product["tags"]) && is_array($product["tags"])) {
+            $this->updateProductSubTable(
                 "product_tag",
                 [
                     "tag_id",
-                    "product_id",
+                    "product_id"
                 ],
-                [$tag[0]["id"], $productId]
+                $this->mapWithId($product["tags"], $productId),
+                $productId
             );
         }
-        foreach ($remove as $tagName) {
-            $tag = $this->db->selectWhere("tags", "id", "name = '$tagName'");
-            $this->db->deleteWhere(
-                "product_tag",
-                " tag_id = " . $tag[0]["id"] . " AND product_id = $productId"
-            );
-        }
+
+        return true;
+    }
+    private function updateProductSubTable($table, $columns, $values, $id)
+    {
+        $this->db->deleteWhere($table, "product_id = '$id'");
+
+        $this->db->insertMulti($table, $columns, $values);
     }
     public function deleteProduct($product)
     {
