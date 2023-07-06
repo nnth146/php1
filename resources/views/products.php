@@ -19,7 +19,8 @@
         <div class="ui header">
             <?php echo $inputs["header"] ?>
         </div>
-        <form action="<?php echo !isset($inputs['id']) ? '?action=create' : ('?action=edit&id=' . $inputs['id']) ?>" class="ui form" method="post" enctype="multipart/form-data">
+        <form action="<?php echo !isset($inputs['id']) ? '?action=create' : ('?action=edit&id=' . $inputs['id']) ?>"
+            class="ui form" method="post" enctype="multipart/form-data">
             <div class="field">
                 <label>Product name</label>
                 <div class="ui input">
@@ -101,12 +102,10 @@
                     <label>Feature Image</label>
                     <div class="ui action input">
                         <input id="feature_image-name" type="text" placeholder="Upload feature image" readonly>
-                        <div class="ui button">
-                            <label>
-                                Uploads
-                                <input name="feature_image" id="feature_image" type="file" hidden>
-                            </label>
-                        </div>
+                        <label class="ui button">
+                            Uploads
+                            <input name="feature_image" id="feature_image" type="file" hidden>
+                        </label>
                     </div>
                     <div class="input__error">
                         <?php if (isset($inputs["feature_image-error"])): ?>
@@ -129,21 +128,25 @@
                     <label>Gallery</label>
                     <div class="ui action input">
                         <input id="gallery-name" type="text" placeholder="Upload gallery" readonly>
-                        <div class="ui button">
-                            <label>
-                                Uploads
-                                <input name="gallery[]" id="gallery" type="file" multiple hidden>
-                            </label>
-                        </div>
+                        <label class="ui button">
+                            Uploads
+                            <input name="gallery[]" id="gallery" type="file" multiple hidden>
+                        </label>
                     </div>
-                    <div class="input__error"></div>
+                    <div class="input__error">
+                        <?php if (isset($inputs["gallery-error"])): ?>
+                            <?php foreach ($inputs["gallery-error"] as $error): ?>
+                                <div>
+                                    <?php echo $error ?>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
                     <div class="preview" id="gallery-preview">
-                        <?php if (isset($inputs["feature_image"])): ?>
-                            <?php if (isset($inputs["gallery"])): ?>
-                                <?php foreach ($inputs["gallery"] as $url): ?>
-                                    <img class="ui small image" src="<?php echo "/php1/" . $url; ?>">
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                        <?php if (isset($inputs["gallery"])): ?>
+                            <?php foreach ($inputs["gallery"] as $url): ?>
+                                <img class="ui small image" src="<?php echo "/php1/" . $url; ?>">
+                            <?php endforeach; ?>
                             <input type="text" name="old-gallery-image" value="void" hidden checked>
                         <?php endif; ?>
                     </div>

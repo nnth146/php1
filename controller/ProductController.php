@@ -164,7 +164,7 @@ class ProductController
 
         if (!isset($oldProduct)) {
             View::render("404");
-            exit;
+            return;
         }
 
         $inputs = array_merge($inputs, [
@@ -240,10 +240,10 @@ class ProductController
 
         if(!isset($product)) {
             View::render("404");
-            exit;
+            return;
         }
 
-        if (isset($product["feature_image"])) {
+        if (!empty($product["feature_image"])) {
             unlink($product["feature_image"]);
         }
 
