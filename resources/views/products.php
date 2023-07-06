@@ -28,7 +28,7 @@
                         value="<?php echo $inputs["name"] ?? '' ?>">
                 </div>
                 <div class="input__error">
-                    <?php if (isset($inputs["name-error"])): ?>
+                    <?php if (isset($inputs["name-error"]) && is_array($inputs["name-error"])): ?>
                         <?php foreach ($inputs["name-error"] as $error): ?>
                             <div>
                                 <?php echo $error ?>
@@ -45,7 +45,7 @@
                             value="<?php echo $inputs["sku"] ?? '' ?>">
                     </div>
                     <div class="input__error">
-                        <?php if (isset($inputs["sku-error"])): ?>
+                        <?php if (isset($inputs["sku-error"]) && is_array($inputs["sku-error"])): ?>
                             <?php foreach ($inputs["sku-error"] as $error): ?>
                                 <div>
                                     <?php echo $error ?>
@@ -61,7 +61,7 @@
                             value="<?php echo $inputs["price"] ?? '' ?>">
                     </div>
                     <div class="input__error">
-                        <?php if (isset($inputs["price-error"])): ?>
+                        <?php if (isset($inputs["price-error"]) && is_array($inputs["price-error"])): ?>
                             <?php foreach ($inputs["price-error"] as $error): ?>
                                 <div>
                                     <?php echo $error ?>
@@ -74,7 +74,7 @@
             <div class="field">
                 <label>Category</label>
                 <select class="ui fluid dropdown" multiple name="category[]" id="category">
-                    <?php if (isset($inputs["categories"])): ?>
+                    <?php if (isset($inputs["categories"]) && is_array($inputs["categories"])): ?>
                         <option value="">Choose Category</option>
                         <?php foreach ($inputs["categories"] as $category): ?>
                             <option value="<?php echo $category["name"]; ?>" <?php echo inArray($inputs['category'] ?? [], $category['name']) ? 'selected' : '' ?>>
@@ -88,7 +88,7 @@
                 <label>Tag</label>
                 <select class="ui fluid dropdown" multiple="" name="tag[]" id="tag">
                     <option value="">Choose Tag</option>
-                    <?php if (isset($inputs["tags"])): ?>
+                    <?php if (isset($inputs["tags"]) && is_array($inputs["tags"])): ?>
                         <?php foreach ($inputs["tags"] as $tag): ?>
                             <option value="<?php echo $tag["name"]; ?>" <?php echo inArray($inputs['tag'] ?? [], $tag['name']) ? 'selected' : '' ?>>
                                 <?php echo $tag["name"]; ?>
@@ -108,7 +108,7 @@
                         </label>
                     </div>
                     <div class="input__error">
-                        <?php if (isset($inputs["feature_image-error"])): ?>
+                        <?php if (isset($inputs["feature_image-error"]) && is_array($inputs["feature_image-error"])): ?>
                             <?php foreach ($inputs["feature_image-error"] as $error): ?>
                                 <div>
                                     <?php echo $error ?>
@@ -134,7 +134,7 @@
                         </label>
                     </div>
                     <div class="input__error">
-                        <?php if (isset($inputs["gallery-error"])): ?>
+                        <?php if (isset($inputs["gallery-error"]) && is_array($inputs["gallery-error"])): ?>
                             <?php foreach ($inputs["gallery-error"] as $error): ?>
                                 <div>
                                     <?php echo $error ?>
@@ -143,7 +143,7 @@
                         <?php endif; ?>
                     </div>
                     <div class="preview" id="gallery-preview">
-                        <?php if (isset($inputs["gallery"])): ?>
+                        <?php if (isset($inputs["gallery"]) && is_array($inputs["gallery"])): ?>
                             <?php foreach ($inputs["gallery"] as $url): ?>
                                 <img class="ui small image" src="<?php echo "/php1/" . $url; ?>">
                             <?php endforeach; ?>

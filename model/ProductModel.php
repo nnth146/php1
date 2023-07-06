@@ -126,6 +126,16 @@ class ProductModel
         $fetchData = $this->db->query($sql, true);
         return !empty($fetchData) ? $fetchData[0] : null;
     }
+    public function getSimpleProductFromId($id)
+    {
+        $sql = "SELECT id,
+            FROM products
+            where id = '$id'
+            GROUP BY p.id";
+
+        $fetchData = $this->db->query($sql, true);
+        return !empty($fetchData) ? $fetchData[0] : null;
+    }
     public function storeProduct($product)
     {
         $columns_values = [
@@ -191,7 +201,7 @@ class ProductModel
             "price" => $product["price"],
         ];
 
-        if(isset($product["feature_image"])) {
+        if (isset($product["feature_image"])) {
             $columns_values["feature_image"] = $product["feature_image"];
         }
         $productId = $product["id"];

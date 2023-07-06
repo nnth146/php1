@@ -47,17 +47,26 @@ class ProductController
     {
         return $_GET[$name] ?? $fail;
     }
+    protected function moveFile($file, $name, $dir)
+    {
+        $filename = pathinfo($name, PATHINFO_FILENAME);
+        $extension = pathinfo($name, PATHINFO_EXTENSION);
+        $target_file = $dir . $filename . "_uid_" . uniqid() . ".$extension";
+
+        if (move_uploaded_file($file["tmp_name"], $target_file)) {
+            return $target_file;
+        }
+        return false;
+    }
     protected function storeFile($file, $dir)
     {
         $filePath = "";
 
         if (file_exists($file["tmp_name"])) {
-            $filename = pathinfo($file["name"], PATHINFO_FILENAME);
-            $extension = pathinfo($file["name"], PATHINFO_EXTENSION);
-            $target_file = $dir . $filename . "_uid_" . uniqid() . ".$extension";
+            $path = $this->moveFile($file["tmp_name"], $file["name"], $dir);
 
-            if (move_uploaded_file($file["tmp_name"], $target_file)) {
-                $filePath = $target_file;
+            if ($path) {
+                $filePath = $path;
             }
         }
 
@@ -70,13 +79,10 @@ class ProductController
 
         for ($i = 0; $i < $quantity; $i++) {
             if (file_exists($files["tmp_name"][$i])) {
-                $filename = pathinfo($files["name"][$i], PATHINFO_FILENAME);
-                $extension = pathinfo($files["name"][$i], PATHINFO_EXTENSION);
+                $path = $this->moveFile($files["tmp_name"][$i], $files["name"][$i], $dir);
 
-                $target_file = $dir . $filename . "_uid_" . uniqid() . ".$extension";
-
-                if (move_uploaded_file($files["tmp_name"][$i], $target_file)) {
-                    array_push($filePaths, $target_file);
+                if ($path) {
+                    array_push($filePaths, $path);
                 }
             }
         }
@@ -160,9 +166,9 @@ class ProductController
     {
         $inputs["header"] = "Edit Product";
 
-        $oldProduct = $this->model->getProductFromId($this->gets("id"));
+        $oldProduct = $this->gets("id", false) ? $this->model->getProductFromId($this->gets("id")) : null;
 
-        if (!isset($oldProduct)) {
+        if(!isset($oldProduct)) {
             View::render("404");
             return;
         }
@@ -207,7 +213,7 @@ class ProductController
                     if (!empty($oldProduct["feature_image"])) {
                         unlink($oldProduct["feature_image"]);
                     }
-                } else if(isset($_POST["old-feature-image"])){
+                } else if (isset($_POST["old-feature-image"])) {
                     $product["feature_image"] = null;
                 }
 
@@ -236,9 +242,9 @@ class ProductController
 
     public function destroy()
     {
-        $product = $this->model->getProductFromId($_POST["id"] ?? "");
+        $product = isset($_POST["id"]) ? $this->model->getSimpleProductFromId($_POST["id"]) : null;
 
-        if(!isset($product)) {
+        if (!isset($product)) {
             View::render("404");
             return;
         }

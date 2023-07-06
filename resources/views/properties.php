@@ -24,7 +24,7 @@
                         <button class="positive ui button">Add</button>
                     </div>
                     <div class="input__error">
-                        <?php if (isset($inputs["category-error"])): ?>
+                        <?php if (isset($inputs["category-error"]) && is_array($inputs["category-error"])): ?>
                             <?php foreach ($inputs["category-error"] as $error): ?>
                                 <div>
                                     <?php echo $error ?>
@@ -42,7 +42,7 @@
                         <button class="positive ui button">Add</button>
                     </div>
                     <div class="input__error">
-                        <?php if (isset($inputs["tag-error"])): ?>
+                        <?php if (isset($inputs["tag-error"]) && is_array($inputs["tag-error"])): ?>
                             <?php foreach ($inputs["tag-error"] as $error): ?>
                                 <div>
                                     <?php echo $error ?>
