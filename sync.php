@@ -56,18 +56,10 @@ function getDataFromHtml($pattern, $html)
 }
 
 $links = getProductLinks();
-
+$products = [];
 foreach ($links as $link) {
     $product = getProductFromLink($link);
-    echo "feature_image: <img style=\"width:10em;\" src=\"" . $product["feature_image-src"] . "\"></img> <br>";
-    echo "name: " . $product["name"] . "<br>";
-    echo "price: " . $product["price"] . "<br>";
-    echo "sku: " . $product["sku"] . "<br>";
-    echo "category: " . $product["category"] . "<br>";
-    echo "tag: " . implode(",", $product["tags"]) . "<br>";
-    echo "gallery: " . "<br>";
-    foreach ($product["gallery-src"] as $src) {
-        echo "<img style=\"width:10em;\" src=\"" . $src . "\"></img> ";
-    }
-    echo "<br><br>";
+    array_push($products, $product);
 }
+
+print_r($products);
