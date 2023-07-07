@@ -19,14 +19,15 @@ class ProductController
                 "name" => ["require"],
                 "price" => ["min:0"],
                 "feature_image" => ["image", "filemax:1024"],
-                "gallery" => ["image", "filemax:1024"]
+                "gallery" => ["image", "filemax:1024"],
+                "sku" => ["unique:products.sku"]
             ],
             [
                 "name" => [
                     "require" => "Tên sản phẩm không thể bỏ trống",
                 ],
                 "sku" => [
-                    "require" => "Sku không thể bỏ trống"
+                    "unique" => "SKU đã tồn tại! Vui lòng nhập SKU khác"
                 ],
                 "price" => [
                     "require" => "Giá sản phẩm không được bỏ trống",
@@ -184,6 +185,10 @@ class ProductController
 
         if (count($_POST) > 0) {
             $validator = $this->createValidator();
+
+            $oldSku = isset($oldProduct["sku"]) ? "=".$oldProduct["sku"] : "";
+
+            $validator->setRule("sku",  ["unique:products.sku$oldSku"]);
 
             $errors = $validator->validate();
 

@@ -12,25 +12,23 @@ function getProductFromLink($link)
 {
     $html = file_get_contents($link);
 
-    $srcPattern = "/<div class=\"woocommerce-product-gallery__wrapper\">[\n].*?<img.*?src=\"(\S+)\"/";
-    $product["src"] = getDataFromHtml($srcPattern, $html);
+    $product["feature_image-src"] = getDataFromHtml("/<div class=\"woocommerce-product-gallery__wrapper\">[\n].*?<img.*?src=\"(\S+)\"/", $html);
 
-    $namePattern = "/<h1 class=\"product_title entry-title\">(.*?)<\/h1>/";
-    $product["name"] = getDataFromHtml($namePattern, $html);
+    $product["gallery-src"] = getDatasFromHtml("/<div.*?<a href=\"(.*?)\"/", getDataFromHtml("/<div class=\"woocommerce-product-gallery__wrapper\">([\n\s\S]+)?<div class=\"summary entry-summary\">/", $html));
 
-    $pricePattern = "/<p class=\"price\">.*?<bdi>.*?<\/bdi>.*?<bdi>.*?<\/span>(.*?)<\/bdi>/";
-    $product["price"] = getDataFromHtml($pricePattern, $html);
+    $product["name"] = getDataFromHtml("/<h1 class=\"product_title entry-title\">(.*?)<\/h1>/", $html);
 
-    $skuPattern = "/<span class=\"sku\">(.*?)<\/span>/";
-    $product["sku"] = getDataFromHtml($skuPattern, $html);
+    $product["price"] = getDataFromHtml("/<p class=\"price\">.*?<bdi>.*?<\/bdi>.*?<bdi>.*?<\/span>(.*?)<\/bdi>/", $html);
+    
+    if(empty($product["price"])) {
+        $product["price"] = "0";
+    }
 
-    $categoryPattern = "/<span class=\"posted_in\">.*?<a.*?>(.*?)<\/a>/";
-    $product["category"] = getDataFromHtml($categoryPattern, $html);
+    $product["sku"] = getDataFromHtml("/<span class=\"sku\">(.*?)<\/span>/", $html);
 
-    $tagPattern1 = "/<span class=\"tagged_as\">(.*?)<\/span>/";
-    $tagPattern2 = "/<a.*?>(.*?)<\/a>/";
+    $product["category"] = getDataFromHtml("/<span class=\"posted_in\">.*?<a.*?>(.*?)<\/a>/", $html);
 
-    $product["tags"] = getDatasFromHtml($tagPattern2, getDataFromHtml($tagPattern1, $html));
+    $product["tags"] = getDatasFromHtml("/<a.*?>(.*?)<\/a>/", getDataFromHtml("/<span class=\"tagged_as\">(.*?)<\/span>/", $html));
 
     return $product;
 }
@@ -61,10 +59,15 @@ $links = getProductLinks();
 
 foreach ($links as $link) {
     $product = getProductFromLink($link);
-    echo "src: " . $product["src"] . "<br>";
+    echo "feature_image: <img style=\"width:10em;\" src=\"" . $product["feature_image-src"] . "\"></img> <br>";
     echo "name: " . $product["name"] . "<br>";
     echo "price: " . $product["price"] . "<br>";
     echo "sku: " . $product["sku"] . "<br>";
     echo "category: " . $product["category"] . "<br>";
-    echo "tag: " . implode(",", $product["tags"]) . "<br><br>";
+    echo "tag: " . implode(",", $product["tags"]) . "<br>";
+    echo "gallery: " . "<br>";
+    foreach ($product["gallery-src"] as $src) {
+        echo "<img style=\"width:10em;\" src=\"" . $src . "\"></img> ";
+    }
+    echo "<br><br>";
 }

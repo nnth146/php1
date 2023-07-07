@@ -14,6 +14,9 @@ class Validator
         $this->validates = $validates;
         $this->errors = $errors;
     }
+    public function setRule($field, $rules) {
+        $this->validates[$field] = $rules;
+    }
     public function validate()
     {
         $errors = [];
@@ -70,12 +73,31 @@ trait Rule
         }
         return false;
     }
-    public function unique($input, $table)
+    public function unique($input, $parameters)
     {
+        $tableAndField = explode(".", $parameters);
+        $table = $tableAndField[0];
+        $field = "name";
+
         $pdo = new PdoDB();
         $fetchData = $pdo->select($table, "*");
+
+        if(count($tableAndField) > 1) {
+            $fieldAndValue = explode("=", $tableAndField[1]);
+
+            $field = $fieldAndValue[0];
+
+            if(count($fieldAndValue) > 1) {
+                $oldValue = $fieldAndValue[1];
+            }
+        }
+
         foreach($fetchData as $data) {
-            if($data["name"] == $input) {
+            if($data[$field] === $input) {
+                if(isset($oldValue) && $oldValue === $input) {
+                    return false;
+                }
+
                 return true;
             }
         }

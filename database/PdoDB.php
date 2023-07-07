@@ -46,8 +46,21 @@ class PdoDB
     protected function mapValuesToStringValues($values)
     {
         return array_map(function ($element) {
+            if($element === null) {
+                return "null";
+            }
+
             return "'$element'";
         }, $values);
+    }
+    protected function mapValuesKeys($values_keys) {
+        return array_map(function ($k, $v) {
+            if($v === null) {
+                return "$k=null";
+            }
+
+            return "$k='$v'";
+        }, array_keys($values_keys), array_values($values_keys));
     }
     /**
      * Insert record[columns][values] into [table]
@@ -69,6 +82,8 @@ class PdoDB
             $values = implode(",", $values);
 
             $sql = "INSERT INTO $table($columns) VALUES ($values)";
+
+            var_dump($sql);
 
             $this->conn->exec($sql);
 
@@ -118,9 +133,7 @@ class PdoDB
     public function update($table, $updates)
     {
         try {
-            $updates = array_map(function ($k, $v) {
-                return "$k='$v'";
-            }, array_keys($updates), array_values($updates));
+            $updates = $this->mapValuesKeys($updates);
 
             $columns_values = implode(",", $updates);
 
@@ -136,9 +149,7 @@ class PdoDB
     public function updateWhere($table, $updates, $where)
     {
         try {
-            $updates = array_map(function ($k, $v) {
-                return "$k='$v'";
-            }, array_keys($updates), array_values($updates));
+            $updates = $this->mapValuesKeys($updates);
 
             $columns_values = implode(",", $updates);
 
