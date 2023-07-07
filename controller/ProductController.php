@@ -86,7 +86,8 @@ class ProductController
     public function index()
     {
         $conditions = [
-            "orderBy" => $this->gets("orderby", "date") . " " . $this->gets("order", "asc"),
+            "field" => $this->gets("orderby", "date"),
+            "order" => $this->gets("order", "asc"),
             "search" => $this->gets("search"),
             "category" => $this->gets("category"),
             "tag" => $this->gets("tag"),
@@ -111,7 +112,8 @@ class ProductController
             "prevPage" => $paginator->prevPage(),
             "categories" => $this->model->getCategories(),
             "tags" => $this->model->getTags(),
-            "oldQueryString" => http_build_query(array_diff_key($_GET, ["page" => ""])),
+            "noPageQuery" => http_build_query(array_diff_key($_GET, ["page" => ""])),
+            "noActionQuery" => http_build_query(array_diff_key($_GET, ["action" => ""])),
             "page" => $paginator->getCurrentPage()
         ];
 
@@ -254,7 +256,15 @@ class ProductController
 
         $this->model->deleteProduct($product);
 
-        redirect("/php1");
+        $queryString = htmlspecialchars(http_build_query(array_diff_key($_GET, ["action" => ""])));
+
+        if(empty($queryString)) {
+            $uri = "/php1";
+        }else {
+            $uri = "/php1?$queryString";
+        };
+
+        redirect("$uri");
     }
 }
 

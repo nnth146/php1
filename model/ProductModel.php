@@ -40,18 +40,13 @@ class ProductModel
             $sql .= $havingQuery;
         }
 
-        if (!empty($conditions["orderBy"])) {
-            $sql .= " ORDER BY p." . $conditions["orderBy"];
-        }
-
-        $offset = $perPage * ($currentPage - 1);
-        $sql .= " LIMIT $perPage OFFSET $offset";
-
         $fetchData = $this->db->query($sql, true);
+
         $total = $this->db->query("SELECT FOUND_ROWS() total", true)[0]["total"];
 
         $paginator = new Paginator($fetchData, $total, $region, $perPage);
         $paginator->setPage($currentPage);
+        $paginator->sort($conditions["field"], $conditions["order"]);
 
         return $paginator;
     }
@@ -145,7 +140,7 @@ class ProductModel
     {
         $columns_values = [
             "name" => $product["name"],
-            "sku" => $product["sku"],
+            "sku" => empty($product["sku"]) ? NULL : $product["sku"],
             "price" => $product["price"],
             "feature_image" => $product["feature_image"]
         ];
@@ -192,7 +187,7 @@ class ProductModel
     {
         $columns_values = [
             "name" => $product["name"],
-            "sku" => $product["sku"],
+            "sku" => empty($product["sku"]) ? NULL : $product["sku"],
             "price" => $product["price"],
         ];
 

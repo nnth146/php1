@@ -20,10 +20,25 @@ class Paginator
     }
     public function getDatas()
     {
-        return $this->datas;
+        return array_slice($this->datas, ($this->currentPage - 1)*$this->perPage, $this->perPage);
     }
     public function getCurrentPage() {
         return $this->currentPage;
+    }
+    public function sort($field, $order) {
+        $flag = SORT_REGULAR;
+
+        if($field == 'price') {
+            $flag = SORT_NUMERIC;
+        }
+
+        if($field == 'name') {
+            $flag = SORT_STRING;
+        }
+
+        $fields = array_column($this->datas, $field);
+
+        array_multisort($fields, $order == 'asc' ? SORT_ASC : SORT_DESC, $flag, $this->datas);
     }
     public function nextPage()
     {

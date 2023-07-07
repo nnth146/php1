@@ -37,8 +37,8 @@ switch ($action) {
     case "properties":
         route("PropertiesController", "create");
         break;
-    case "filter":
-        route("ProductController", "index");
+    case "sync":
+        require_once "sync.php";
         break;
     default:
         require_once "resources/views/404.php";
