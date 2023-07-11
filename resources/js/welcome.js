@@ -1,13 +1,19 @@
 import { formatPrice, resolveSuffixPrice } from "./support.js";
 
 $(function () {
+    ready();
+
+    document.addEventListener('ready', ready);
+});
+
+function ready() {
     restoreDefaultIfSelectedAgain("#category");
     restoreDefaultIfSelectedAgain("#tag");
 
     resolvePrice();
 
     $(".mini.modal").modal({
-        detachable:false
+        detachable: false
     });
 
     $("div[name=delete-btn]").on("click", function () {
@@ -17,7 +23,7 @@ $(function () {
     $('#search-btn').on("click", function () {
         $(this).parents("form").trigger("submit");
     });
-});
+}
 
 function restoreDefaultIfSelectedAgain(dropdownSelector) {
     $(dropdownSelector).dropdown({

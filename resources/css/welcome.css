@@ -2,6 +2,7 @@
     width: 95%;
     margin: auto;
     margin-top: 2em;
+    overflow: auto;
 }
 
 .title {
@@ -45,12 +46,16 @@
     flex-wrap: wrap;
 }
 
-.flex--align-start {
-    align-items: start;
+.flex--max {
+    width: 12em;
 }
 
-.flex--content-center {
-    justify-content: center;
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(4, min-content);
+    max-width: 60em;
+    gap: 4px;
+    overflow: hidden;
 }
 
 .m-auto {
@@ -103,4 +108,8 @@
 .pagination__link--move {
     color: black;
     width: 3em;
+}
+
+.footer {
+    height: 12em;
 }

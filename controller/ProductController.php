@@ -3,6 +3,7 @@
 require_once "core/View.php";
 require_once "core/Validator.php";
 require_once "model/ProductModel.php";
+require_once "core/SyncVillatheme.php";
 
 class ProductController
 {
@@ -47,42 +48,6 @@ class ProductController
     protected function gets($name, $fail = "")
     {
         return $_GET[$name] ?? $fail;
-    }
-    protected function moveFile($file, $name, $dir)
-    {
-        $filename = pathinfo($name, PATHINFO_FILENAME);
-        $extension = pathinfo($name, PATHINFO_EXTENSION);
-        $target_file = $dir . $filename . "_uid_" . uniqid() . ".$extension";
-
-        if (move_uploaded_file($file, $target_file)) {
-            return $target_file;
-        }
-        return "";
-    }
-    protected function storeFile($file, $dir)
-    {
-        $filePath = "";
-
-        if (file_exists($file["tmp_name"])) {
-            $filePath = $this->moveFile($file["tmp_name"], $file["name"], $dir);
-        }
-        
-        return $filePath;
-    }
-    protected function storeFiles($files, $dir)
-    {
-        $quantity = count($files["name"]);
-        $filePaths = [];
-
-        for ($i = 0; $i < $quantity; $i++) {
-            if (file_exists($files["tmp_name"][$i])) {
-                if ($path = $this->moveFile($files["tmp_name"][$i], $files["name"][$i], $dir)) {
-                    array_push($filePaths, $path);
-                }
-            }
-        }
-
-        return $filePaths;
     }
     public function index()
     {
@@ -138,8 +103,8 @@ class ProductController
                     "price" => $_POST["price"],
                     "categories" => isset($_POST["category"]) ? $_POST["category"] : [],
                     "tags" => isset($_POST["tag"]) ? $_POST["tag"] : [],
-                    "feature_image" => $this->storeFile($_FILES["feature_image"], "storage/"),
-                    "gallery" => $this->storeFiles($_FILES["gallery"], "storage/")
+                    "feature_image" => $_FILES["feature_image"],
+                    "gallery" => $_FILES["gallery"]
                 ];
 
                 $this->model->storeProduct($product);
@@ -165,11 +130,11 @@ class ProductController
 
         $oldProduct = $this->gets("id", false) ? $this->model->getProductFromId($this->gets("id")) : null;
 
-        if(!isset($oldProduct)) {
+        if (!isset($oldProduct)) {
             View::render("404");
             return;
         }
-        
+
         $inputs = array_merge($inputs, [
             "id" => $oldProduct["id"],
             "name" => $_POST["name"] ?? $oldProduct["name"],
@@ -186,9 +151,9 @@ class ProductController
         if (count($_POST) > 0) {
             $validator = $this->createValidator();
 
-            $oldSku = isset($oldProduct["sku"]) ? "=".$oldProduct["sku"] : "";
+            $oldSku = isset($oldProduct["sku"]) ? "=" . $oldProduct["sku"] : "";
 
-            $validator->setRule("sku",  ["unique:products.sku$oldSku"]);
+            $validator->setRule("sku", ["unique:products.sku$oldSku"]);
 
             $errors = $validator->validate();
 
@@ -200,31 +165,9 @@ class ProductController
                     "price" => $_POST["price"],
                     "categories" => $_POST["category"] ?? [],
                     "tags" => $_POST["tag"] ?? [],
-                    "feature_image" => $this->storeFile($_FILES["feature_image"], "storage/"),
-                    "gallery" => $this->storeFiles($_FILES["gallery"], "storage/")
+                    "feature_image" => ["new" => $_FILES["feature_image"], "old" => $oldProduct["feature_image"]],
+                    "gallery" => ["new" => $_FILES["gallery"], "old" => explode("|", $oldProduct["gallery"])]
                 ];
-
-                if (!empty($product["feature_image"])) {
-                    if (!empty($oldProduct["feature_image"])) {
-                        unlink($oldProduct["feature_image"]);
-                    }
-                } else if (!isset($_POST["old-feature-image"])) {
-                    if (!empty($oldProduct["feature_image"])) {
-                        unlink($oldProduct["feature_image"]);
-                    }
-                } else if (isset($_POST["old-feature-image"])) {
-                    $product["feature_image"] = null;
-                }
-
-                if (count($product["gallery"]) >= 0 && !isset($_POST["old-gallery-image"])) {
-                    if ($productGallery = explode("|", $oldProduct["gallery"])) {
-                        foreach ($productGallery as $image) {
-                            unlink($image);
-                        }
-                    }
-                } else {
-                    $product["gallery"] = null;
-                }
 
                 $this->model->updateProduct($product);
 
@@ -263,13 +206,57 @@ class ProductController
 
         $queryString = htmlspecialchars(http_build_query(array_diff_key($_GET, ["action" => ""])));
 
-        if(empty($queryString)) {
+        if (empty($queryString)) {
             $uri = "/php1";
-        }else {
+        } else {
             $uri = "/php1?$queryString";
-        };
+        }
+        ;
 
         redirect("$uri");
+    }
+    public function sync()
+    {
+        $start = $_GET["start"] ?? 1;
+        $count = $_GET["count"] ?? 3;
+        $offset = ($start - 1) * $count;
+
+        $file_name = 'sync.txt';
+        $sync = new SyncVillatheme();
+
+        if (!file_exists($file_name)) {
+            $file = fopen($file_name, 'w') or die('Unable to open file!');
+            $sync = new SyncVillatheme();
+            $productLinks = $sync->getProductLinks();
+            $productLinks = implode("\n", $productLinks);
+            fwrite($file, $productLinks);
+            fclose($file);
+        }
+
+        $file = fopen($file_name, 'r') or die('Unable to open file!');
+        $links = explode("\n", fread($file, filesize($file_name)));
+        fclose($file);
+
+        $total = count($links);
+
+        $number = 0;
+        for ($i = min([$offset, $total]); $i < $total; $i++) {
+            if ($count <= 0) {
+                break;
+            }
+            $this->model->storeProductSync($sync->getProductFromLink($links[$i]));
+            $count--;
+            $number++;
+        }
+
+        $process = ($offset + $number) / $total * 100;
+
+        if ($offset > $total) {
+            echo json_encode(["status" => "done", "process" => 100]);
+            exit;
+        }
+
+        echo json_encode(["status" => "processing", "process" => $process]);
     }
 }
 

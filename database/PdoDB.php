@@ -83,8 +83,6 @@ class PdoDB
 
             $sql = "INSERT INTO $table($columns) VALUES ($values)";
 
-            var_dump($sql);
-
             $this->conn->exec($sql);
 
             return true;
@@ -92,7 +90,7 @@ class PdoDB
             return false;
         }
     }
-    public function insertMulti($table, $columns, $arrValues)
+    public function insertMulti($table, $columns, $arrValues, $ignore = false)
     {
         try {
             if (is_array($columns)) {
@@ -113,12 +111,15 @@ class PdoDB
             }
 
             $sql = "INSERT INTO $table($columns) VALUES $values";
+            
+            if($ignore) {
+                $sql = "INSERT IGNORE INTO $table($columns) VALUES $values";
+            }
 
             $this->conn->exec($sql);
 
             return true;
         } catch (PDOException $e) {
-            var_dump($e->getMessage());
             return false;
         }
     }

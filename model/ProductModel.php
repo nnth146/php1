@@ -2,6 +2,7 @@
 
 require_once "database/PdoDB.php";
 require_once "core/Paginator.php";
+require_once "core/FileHandler.php";
 
 class ProductModel
 {
@@ -129,12 +130,129 @@ class ProductModel
         $fetchData = $this->db->query($sql, true);
         return !empty($fetchData) ? $fetchData[0] : null;
     }
-    public function getSimpleProductFromId($id)
+    public function getSimpleProductFromField($field, $value)
     {
-        $sql = "SELECT id FROM products where id = '$id'";
+        $sql = "SELECT
+        p.id,
+        p.feature_image,
+        GROUP_CONCAT(DISTINCT g.image_url SEPARATOR '|') gallery
+        FROM
+            products p
+        LEFT JOIN 
+            gallery g
+        ON
+            g.product_id = p.id
+        WHERE
+            p.$field = '$value'
+        GROUP BY
+            p.id";
 
         $fetchData = $this->db->query($sql, true);
         return !empty($fetchData) ? $fetchData[0] : null;
+    }
+    public function getSimpleProductFromId($id)
+    {
+        return $this->getSimpleProductFromField("id", $id);
+    }
+    protected function mapValueToArray($arr)
+    {
+        return array_map(function ($v) {
+            return [$v];
+        }, $arr);
+    }
+    public function storeProductSync($product)
+    {
+        $properties = ["categories", "tags"];
+
+        foreach ($properties as $property) {
+            if (!empty($product[$property]) && is_array($product[$property])) {
+                $values = $this->mapValueToArray($product[$property]);
+                $this->db->insertMulti($property, ["name"], $values, true);
+            }
+        }
+
+        foreach ($properties as $property) {
+            $where = [];
+            foreach ($product[$property] as $name) {
+                array_push($where, "name = '$name'");
+            }
+            $where = implode(" OR ", $where);
+            $propertyIds = $this->db->selectWhere($property, ["id"], $where);
+            if(!empty($propertyIds)) {
+                $product[$property] = array_map(function($e) {
+                    return $e['id'];
+                }, $propertyIds);
+            }
+        }
+
+        $oldProduct = $this->getSimpleProductFromField("sku", $product["sku"]);
+
+        $featureImage = $this->resolveFileFromUrl($product["feature_image-src"]);
+
+        $gallery = ["name" => [], "tmp_name" => []];
+
+        foreach ($product["gallery-src"] as $url) {
+            $file = $this->resolveFileFromUrl($url);
+            array_push($gallery["name"], $file["name"]);
+            array_push($gallery["tmp_name"], $file["tmp_name"]);
+        }
+
+        if ($oldProduct) {
+            $product["id"] = $oldProduct["id"];
+
+            $product["feature_image"]["new"] = $featureImage;
+            $product["feature_image"]["old"] = $oldProduct["feature_image"];
+            $product["gallery"]["new"] = $gallery;
+            $product["gallery"]["old"] = explode("|", $oldProduct["gallery"]);
+
+            $this->updateProduct($product);
+        } else {
+            $product["feature_image"] = $featureImage;
+            $product["gallery"] = $gallery;
+
+            $this->storeProduct($product);
+        }
+
+        $this->unlinkTmpFile($featureImage["tmp_name"], $gallery["tmp_name"]);
+
+        return true;
+    }
+    protected function unlinkTmpFile(...$parameters)
+    {
+        foreach ($parameters as $files) {
+            if (empty($files)) {
+                return false;
+            }
+
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
+    }
+    protected function getFileNameFromUrl($url)
+    {
+        $arr = explode("/", $url);
+        return $arr[count($arr) - 1];
+    }
+    protected function resolveFileFromUrl($url)
+    {
+        $file = file_get_contents($url);
+
+        if (!$file) {
+            return null;
+        }
+
+        $tmp = "tmp/tmp" . uniqid();
+
+        if (!file_put_contents($tmp, $file)) {
+            return false;
+        }
+
+        return ["name" => $this->getFileNameFromUrl($url), "tmp_name" => $tmp];
     }
     public function storeProduct($product)
     {
@@ -142,22 +260,35 @@ class ProductModel
             "name" => $product["name"],
             "sku" => empty($product["sku"]) ? null : $product["sku"],
             "price" => $product["price"],
-            "feature_image" => $product["feature_image"]
         ];
 
-        $this->db->insert($this->table, array_keys($columns_values), array_values($columns_values));
+        $handler = new FileHandler($product["feature_image"]);
+
+        $columns_values["feature_image"] = $handler->getFilePath();
+
+        $result = $this->db->insert($this->table, array_keys($columns_values), array_values($columns_values));
+
+        if ($result && $columns_values["feature_image"]) {
+            $handler->store($columns_values["feature_image"]);
+        }
 
         $productId = $this->db->getLastInsertId();
 
-        if (isset($product["gallery"]) && is_array($product["gallery"])) {
-            $this->db->insertMulti(
+        $handler = new FileHandler($product["gallery"]);
+
+        if ($gallery = $handler->getFilePath()) {
+            $result = $this->db->insertMulti(
                 "gallery",
                 [
                     "image_url",
                     "product_id"
                 ],
-                $this->mapWithId($product["gallery"], $productId)
+                $this->mapWithId($gallery, $productId)
             );
+
+            if ($result && $gallery) {
+                $handler->store($gallery);
+            }
         }
 
         if (isset($product["categories"]) && is_array($product["categories"])) {
@@ -191,24 +322,43 @@ class ProductModel
             "price" => $product["price"],
         ];
 
-        if (isset($product["feature_image"])) {
-            $columns_values["feature_image"] = $product["feature_image"];
+        $handler = new FileHandler($product["feature_image"]["new"]);
+
+        if ($path = $handler->getFilePath()) {
+            $columns_values["feature_image"] = $path;
         }
 
         $productId = $product["id"];
 
-        $this->db->updateWhere($this->table, $columns_values, "id = '$productId'");
+        $result = $this->db->updateWhere($this->table, $columns_values, "id = '$productId'");
 
-        if (isset($product["gallery"]) && is_array($product["gallery"])) {
-            $this->updateProductSubTable(
+        if ($result && isset($columns_values["feature_image"])) {
+            if ($product["feature_image"]["old"]) {
+                FileHandler::unlink($product["feature_image"]["old"]);
+            }
+
+            $handler->store($columns_values["feature_image"]);
+        }
+
+        $handler = new FileHandler($product["gallery"]["new"]);
+
+        if ($gallery = $handler->getFilePath()) {
+            $result = $this->updateProductSubTable(
                 "gallery",
                 [
                     "image_url",
                     "product_id"
                 ],
-                $this->mapWithId($product["gallery"], $productId),
+                $this->mapWithId($gallery, $productId),
                 $productId
             );
+            if ($result) {
+                if ($product["gallery"]["old"]) {
+                    FileHandler::unlink($product["gallery"]["old"]);
+                }
+
+                $handler->store($gallery);
+            }
         }
 
         if (isset($product["categories"]) && is_array($product["categories"])) {
@@ -239,9 +389,7 @@ class ProductModel
     }
     private function updateProductSubTable($table, $columns, $values, $id)
     {
-        $this->db->deleteWhere($table, "product_id = '$id'");
-
-        $this->db->insertMulti($table, $columns, $values);
+        return $this->db->deleteWhere($table, "product_id = '$id'") && $this->db->insertMulti($table, $columns, $values);
     }
     public function deleteProduct($product)
     {
@@ -249,13 +397,7 @@ class ProductModel
     }
     public function addCategory($category)
     {
-        $columns = [
-            "name"
-        ];
-        $values = [
-            $category["name"]
-        ];
-        return $this->db->insert($this->categoriesTable, $columns, $values);
+        return $this->db->insert($this->categoriesTable, ["name"], $category["name"]);
     }
     public function deleteCategory($category)
     {
@@ -268,13 +410,7 @@ class ProductModel
     }
     public function addTag($tag)
     {
-        $columns = [
-            "name"
-        ];
-        $values = [
-            $tag["name"]
-        ];
-        return $this->db->insert($this->tagsTable, $columns, $values);
+        return $this->db->insert($this->tagsTable, ["name"], $tag["name"]);
     }
     public function deleteTag($tag)
     {

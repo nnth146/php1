@@ -29,6 +29,7 @@ switch ($action) {
     case "index":
     case "create":
     case "edit":
+    case "sync":
         route("ProductController", $action);
         break;
     case "delete":
@@ -36,9 +37,6 @@ switch ($action) {
         break;
     case "properties":
         route("PropertiesController", "create");
-        break;
-    case "sync":
-        require_once "sync.php";
         break;
     default:
         require_once "resources/views/404.php";

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/php1/resources/css/welcome.css">
 
     <script type="module" src="/php1/resources/js/welcome.js"></script>
+    <script type="module" src="/php1/resources/js/live/welcome.js"></script>
 
     <title>PHP1</title>
 </head>
@@ -17,7 +18,7 @@
 <body>
     <div class="main">
         <div class="title">PHP1</div>
-        <form class="filter">
+        <form id="filter-form" class="filter">
             <?php if (isset($inputs["page"])): ?>
                 <input type="text" name="page" value="<?php echo $inputs["page"]; ?>" hidden>
             <?php endif; ?>
@@ -25,7 +26,7 @@
                 <div class="flex flex--small-gap">
                     <a href="?action=create" class="ui primary button">Add product</a>
                     <a href="?action=properties" class="ui button">Add property</a>
-                    <a href="" class="ui button">Sync from Villatheme</a>
+                    <a href="?action=sync" class="ui button">Sync from Villatheme</a>
                 </div>
                 <div class="ui icon input">
                     <input type="text" name="search" placeholder="Search product"
@@ -90,7 +91,7 @@
                     <input type="text" name="priceto" placeholder="Price To"
                         value="<?php echo $inputs['priceto'] ?? '' ?>">
                 </div>
-                <button class="ui button">Filter</button>
+                <button id="filter-btn" class="ui button">Filter</button>
             </div>
         </form>
 
@@ -130,7 +131,7 @@
                                 <?php endif ?>
                             </td>
                             <td data-label="Gallery">
-                                <div class="flex flex--gap-4px flex--align-start flex--content-center">
+                                <div class="gallery">
                                     <?php if (isset($product["gallery"])): ?>
                                         <?php $gallery = explode("|", $product["gallery"]); ?>
                                         <?php foreach ($gallery as $url): ?>
@@ -219,6 +220,7 @@
                 <?php endif; ?>
             </div>
         <?php endif ?>
+        <div class="footer"></div>
     </div>
 </body>
 
