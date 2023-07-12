@@ -13,17 +13,17 @@
 </head>
 
 <body>
-    <div class="main">
+    <div class="properties__main">
         <div class="ui header">Create Property</div>
         <div class="flex flex--col flex--medium-gap">
-            <form action="?action=properties" method="post" class="ui form">
+            <form name="properties-form" action="?action=properties" method="post" class="ui form">
                 <div class="field">
                     <label>Category</label>
                     <div class="ui action input w-full">
                         <input type="text" name="category" placeholder="Enter category...">
                         <button class="positive ui button">Add</button>
                     </div>
-                    <div class="input__error">
+                    <div class="properties__input__error">
                         <?php if (isset($inputs["category-error"]) && is_array($inputs["category-error"])): ?>
                             <?php foreach ($inputs["category-error"] as $error): ?>
                                 <div>
@@ -34,14 +34,14 @@
                     </div>
                 </div>
             </form>
-            <form action="?action=properties" method="post" class="ui form">
+            <form name="properties-form" action="?action=properties" method="post" class="ui form">
                 <div class="field">
                     <label>Tag</label>
                     <div class="ui action input w-full">
                         <input type="text" name="tag" placeholder="Enter Tag...">
                         <button class="positive ui button">Add</button>
                     </div>
-                    <div class="input__error">
+                    <div class="properties__input__error">
                         <?php if (isset($inputs["tag-error"]) && is_array($inputs["tag-error"])): ?>
                             <?php foreach ($inputs["tag-error"] as $error): ?>
                                 <div>

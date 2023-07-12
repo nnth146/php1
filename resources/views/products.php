@@ -15,11 +15,11 @@
 </head>
 
 <body>
-    <div class="main">
+    <div class="products__main">
         <div class="ui header">
             <?php echo $inputs["header"] ?>
         </div>
-        <form action="<?php echo !isset($inputs['id']) ? '?action=create' : ('?action=edit&id=' . $inputs['id']) ?>"
+        <form id="product-form" action="<?php echo !isset($inputs['id']) ? '?action=create' : ('?action=edit&id=' . $inputs['id']) ?>"
             class="ui form" method="post" enctype="multipart/form-data">
             <div class="field">
                 <label>Product name</label>
@@ -27,7 +27,7 @@
                     <input type="text" name="name" id="name" placeholder="Enter name..."
                         value="<?php echo $inputs["name"] ?? '' ?>">
                 </div>
-                <div class="input__error">
+                <div class="products__input__error">
                     <?php if (isset($inputs["name-error"]) && is_array($inputs["name-error"])): ?>
                         <?php foreach ($inputs["name-error"] as $error): ?>
                             <div>
@@ -44,7 +44,7 @@
                         <input type="text" name="sku" id="sku" placeholder="Enter sku..."
                             value="<?php echo $inputs["sku"] ?? '' ?>">
                     </div>
-                    <div class="input__error">
+                    <div class="products__input__error">
                         <?php if (isset($inputs["sku-error"]) && is_array($inputs["sku-error"])): ?>
                             <?php foreach ($inputs["sku-error"] as $error): ?>
                                 <div>
@@ -60,7 +60,7 @@
                         <input type="text" name="price" id="price" placeholder="Enter name..."
                             value="<?php echo $inputs["price"] ?? '' ?>">
                     </div>
-                    <div class="input__error">
+                    <div class="products__input__error">
                         <?php if (isset($inputs["price-error"]) && is_array($inputs["price-error"])): ?>
                             <?php foreach ($inputs["price-error"] as $error): ?>
                                 <div>
@@ -107,7 +107,7 @@
                             <input name="feature_image" id="feature_image" type="file" hidden>
                         </label>
                     </div>
-                    <div class="input__error">
+                    <div class="products__input__error">
                         <?php if (isset($inputs["feature_image-error"]) && is_array($inputs["feature_image-error"])): ?>
                             <?php foreach ($inputs["feature_image-error"] as $error): ?>
                                 <div>
@@ -133,7 +133,7 @@
                             <input name="gallery[]" id="gallery" type="file" multiple hidden>
                         </label>
                     </div>
-                    <div class="input__error">
+                    <div class="products__input__error">
                         <?php if (isset($inputs["gallery-error"]) && is_array($inputs["gallery-error"])): ?>
                             <?php foreach ($inputs["gallery-error"] as $error): ?>
                                 <div>
@@ -153,8 +153,8 @@
                 </div>
             </div>
             <div class="field">
-                <button class="positive ui button">Accept</button>
-                <a href="/php1" class="negative ui button">Cancel</a>
+                <button id="accept-btn" class="positive ui button">Accept</button>
+                <a id="cancel-btn" href="/php1" class="negative ui button">Cancel</a>
             </div>
         </form>
     </div>

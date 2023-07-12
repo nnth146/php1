@@ -1,15 +1,15 @@
-.main {
+.products__main {
     padding: 3em;
     max-width: 65em;
 }
 
-.input__error {
+.products__input__error {
     padding: 4px;
     color: red;
     font-size: 0.9em;
 }
 
-.preview {
+.products__preview {
     display: flex;
     flex-wrap: wrap;
     margin-top: 8px;

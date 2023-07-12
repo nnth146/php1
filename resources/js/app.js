@@ -1,7 +1,9 @@
 $(function() {
-    $('.ui.dropdown').dropdown();
+    ready();
 
-    document.addEventListener('ready', function() {
-        $('.ui.dropdown').dropdown();
-    });
+    document.addEventListener('ready', ready);
 });
+
+function ready() {
+    $('.ui.dropdown').dropdown();
+}

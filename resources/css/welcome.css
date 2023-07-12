@@ -30,6 +30,12 @@
     display: flex;
 }
 
+.sync__label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .flex--gap-4px {
     gap: 4px;
 }
@@ -48,6 +54,12 @@
 
 .flex--max {
     width: 12em;
+}
+
+.progress {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
 }
 
 .gallery {

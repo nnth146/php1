@@ -397,7 +397,7 @@ class ProductModel
     }
     public function addCategory($category)
     {
-        return $this->db->insert($this->categoriesTable, ["name"], $category["name"]);
+        return $this->db->insert($this->categoriesTable, ["name"], [$category["name"]]);
     }
     public function deleteCategory($category)
     {
@@ -410,7 +410,7 @@ class ProductModel
     }
     public function addTag($tag)
     {
-        return $this->db->insert($this->tagsTable, ["name"], $tag["name"]);
+        return $this->db->insert($this->tagsTable, ["name"], [$tag["name"]]);
     }
     public function deleteTag($tag)
     {

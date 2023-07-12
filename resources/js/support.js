@@ -1,7 +1,9 @@
 export {
     formatPrice, 
     resolveSuffixPrice,
-    readFileAsUrl
+    readFileAsUrl,
+    body,
+    send
 };
 
 function formatPrice() {
@@ -47,5 +49,33 @@ function readFileAsUrl(file) {
         }
 
         reader.readAsDataURL(file);
+    });
+}
+
+function body(html) {
+    const pattern = /<body>[\n\s\S]+<\/body>/;
+    const found = html.match(pattern);
+    return found[0];
+}
+
+function send(method, url, data = null) {
+    return new Promise((resolve, reject) => {
+        let xhttp = new XMLHttpRequest();
+
+        xhttp.onload = function () {
+            resolve(xhttp.responseText);
+        };
+        
+        xhttp.onerror = function () {
+            reject(-1);
+        };
+
+        xhttp.open(method, url);
+
+        if(data) {
+            xhttp.send(data);
+        }else {
+            xhttp.send();
+        }
     });
 }

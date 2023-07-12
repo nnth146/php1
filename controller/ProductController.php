@@ -215,48 +215,33 @@ class ProductController
 
         redirect("$uri");
     }
-    public function sync()
+    public function fetchLinks()
     {
-        $start = $_GET["start"] ?? 1;
-        $count = $_GET["count"] ?? 3;
-        $offset = ($start - 1) * $count;
-
-        $file_name = 'sync.txt';
         $sync = new SyncVillatheme();
+        $productLinks = $sync->getProductLinks();
+        echo json_encode(["result" => $productLinks, "status" => "success"]);
+    }
+    public function syncData()
+    {
+        $link = $_POST["link"] ?? '';
 
-        if (!file_exists($file_name)) {
-            $file = fopen($file_name, 'w') or die('Unable to open file!');
-            $sync = new SyncVillatheme();
-            $productLinks = $sync->getProductLinks();
-            $productLinks = implode("\n", $productLinks);
-            fwrite($file, $productLinks);
-            fclose($file);
-        }
-
-        $file = fopen($file_name, 'r') or die('Unable to open file!');
-        $links = explode("\n", fread($file, filesize($file_name)));
-        fclose($file);
-
-        $total = count($links);
-
-        $number = 0;
-        for ($i = min([$offset, $total]); $i < $total; $i++) {
-            if ($count <= 0) {
-                break;
-            }
-            $this->model->storeProductSync($sync->getProductFromLink($links[$i]));
-            $count--;
-            $number++;
-        }
-
-        $process = ($offset + $number) / $total * 100;
-
-        if ($offset > $total) {
-            echo json_encode(["status" => "done", "process" => 100]);
+        if(empty($link)) {
+            echo json_encode([
+                "result" => null,
+                "status" => "fail",
+                "message" => "Link is empty"
+            ]);
             exit;
         }
 
-        echo json_encode(["status" => "processing", "process" => $process]);
+        $sync = new SyncVillatheme();
+        $product = $sync->getProductFromLink($link);
+
+        if($product) {
+            echo json_encode(["result" => $product, "status" => "success"]);
+        }else{
+            echo json_encode(["result" => null, "status" => "error", "message" => "No products found from the link"]);
+        }
     }
 }
 

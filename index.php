@@ -29,7 +29,8 @@ switch ($action) {
     case "index":
     case "create":
     case "edit":
-    case "sync":
+    case "fetchLinks":
+    case "syncData":
         route("ProductController", $action);
         break;
     case "delete":
