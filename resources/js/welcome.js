@@ -60,14 +60,6 @@ function resolvePrice() {
     $("input[name=priceto]").on("change", resolveSuffixPrice);
 }
 
-async function updateScreen() {
-    let html = await send("GET", window.location.href);
-
-    $(document.body).html(body(html));
-
-    document.dispatchEvent(new Event('ready'));
-}
-
 async function getProductLinks() {
     return new Promise(async (resolve) => {
         let json = await send("GET", "?action=fetchLinks");
@@ -91,12 +83,12 @@ function resolveSync() {
     let sync;
 
     //restore state of sync
-    if(typeof SyncVillatheme.instance === 'object') {
-        sync = SyncVillatheme.instance;
+    if(typeof Sync.instance === 'object') {
+        sync = Sync.instance;
         sync.restore();
     }else {
-        sync = new SyncVillatheme();
-        SyncVillatheme.instance = sync;
+        sync = new Sync();
+        Sync.instance = sync;
     }
 
     $('#sync-btn').on('click', async function (event) {
@@ -110,60 +102,22 @@ function resolveSync() {
             detachable: false,
         }).modal('show');
 
-        if (!sync.links && sync.enable) {
-            sync.finding();
-
-            sync.links = await getProductLinks();
-
-            sync.donefind();
-        }
+        sync.prepare();
     });
 
-    $('#modal-sync-btn').on('click', async function () {
-        if(sync.isCompleted) {
-            $('#sync-modal').modal('hide');
-        }
-
-        if (sync.links && sync.links.length > 0 && sync.enable && !sync.isCompleted) {
-            sync.syncing();
-
-            for (let link of sync.links) {
-                if (sync.stop) {
-                    sync.stopped();
-                    return;
-                }
-
-                let product = await getProductFromLink(link);
-
-                if (product) {
-                    sync.increment();
-                }
-            }
-
-            sync.donesync();
-        }
-
-        if (sync.status == 'syncing') {
-            sync.stopping();
-        }
+    $('#modal-sync-btn').on('click', function () {
+        sync.run();
     });
 
     $('#modal-reset-btn').on('click', async function () {
         if (sync.enable) {
             sync.reset();
-        }
-
-        if (!sync.links && sync.enable) {
-            sync.finding();
-
-            sync.links = await getProductLinks();
-
-            sync.donefind();
+            sync.prepare();
         }
     });
 }
 
-class SyncVillatheme {
+class Sync {
     static instance;
     constructor(status = 'rest', links = null, current = 0, stop = false) {
         this.status = status; // finding, donefind, syncing, donesync, stopping, stopped, rest
@@ -181,53 +135,75 @@ class SyncVillatheme {
     get isCompleted() {
         return this.total === this.current;
     }
-    finding() {
-        this.status = 'finding';
-        this.ui.setState('finding');
+
+    setStatus (status) {
+        this.status = status;
+        this.ui.setState(this.status, this);
     }
-    donefind() {
-        this.status = 'donefind';
-        this.ui.setState('donefind', { total: this.total });
+
+    async update() {
+        $('#filter-form').trigger('submit'); //Gọi form submit để update giao diện được filter luôn
     }
-    syncing() {
-        this.status = 'syncing';
-        this.ui.setState('syncing');
+
+    async prepare() {
+        if (!this.links && this.enable) {
+            this.setStatus('finding');
+
+            this.links = await getProductLinks();
+
+            this.setStatus('donefind');
+        }
     }
-    donesync() {
-        this.status = 'donesync';
-        this.ui.setState('donesync', { total: this.total });
+
+    async run() {
+        if(this.isCompleted) {
+            $('#sync-modal').modal('hide');
+            return;
+        }
+
+        if (this.links && this.links.length > 0 && this.enable && !this.isCompleted) {
+            this.setStatus('syncing');
+
+            for (let link of this.links) {
+                if (this.stop) {
+                    this.stop = false;
+                    this.setStatus('stopped');
+                    return;
+                }
+
+                let product = await getProductFromLink(link);
+
+                if (product) {
+                    this.increment();
+                }
+            }
+
+            this.setStatus('donesync');
+            $('#sync-modal').modal('hide');
+            this.update();
+        }
+
+        if (this.status == 'syncing') {
+            this.stop = true;
+            this.setStatus('stopping');
+        }
     }
-    stopping() {
-        this.status = 'stopping';
-        this.stop = true;
-        this.ui.setState('stopping');
-    }
-    stopped() {
-        this.status = 'stopped';
-        this.stop = false;
-        this.ui.setState('stopped');
-    }
+    
     reset() {
-        this.status = 'rest';
         this.links = null;
         this.current = 0;
         this.stop = false;
-        this.ui.setState('rest');
+        this.setStatus('rest');
     }
+
     increment() {
         this.current++;
         this.ui.incrementSyncProgress(this.current);
     }
-    restore() {
-        this.finding();
-        this.donefind();
 
-        switch(this.status) {
-            case 'syncing': this.syncing(); this.ui.incrementSyncProgress(this.current); break;
-            case 'donesync': this.syncing(); this.donesync(); this.ui.incrementSyncProgress(this.current); break;
-            case 'stopping': this.stopping(); this.ui.incrementSyncProgress(this.current); break;
-            case 'stopped' : this.stopping(); this.stopped(); this.ui.incrementSyncProgress(this.current); break;
-        }
+    restore() {
+        this.ui.restorefind(this);
+        this.ui.setState(this.status, this);
     }
 }
 
@@ -270,6 +246,13 @@ class SyncUI {
         this._setStateButton(this.button.sync, 'default');
 
         $(this.button.main).text('Syncfrom Villatheme');
+    }
+    restorefind(sync) {
+        this._deactiveLoader([this.find.loader]);
+        this._setProgressLabel([this.find.progress], `${sync.total} products found`)
+
+        $(this.find.progress).progress({ percent: '100' });
+        $(this.sync.progress).progress({ total: sync.total, value: sync.current });
     }
     finding() {
         this._activeLoader([this.find.loader]);
