@@ -122,6 +122,10 @@
     width: 3em;
 }
 
+.product {
+    margin-top: 1em;
+}
+
 .footer {
-    height: 12em;
+    height: 4em;
 }

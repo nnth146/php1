@@ -1,14 +1,17 @@
 import { body, send } from "./support.js";
 
-export {redirect, submitPOST, submitGET};
+export { redirect, submitPOST, submitGET };
 
 async function redirect(e) {
     e.preventDefault();
-    let html = await send('GET', $(this).attr('href'));
+    
+    if ($(this).attr('href')) {
+        let html = await send('GET', $(this).attr('href'));
 
-    $('body').html(body(html));
+        $('body').html(body(html));
 
-    document.dispatchEvent(new Event('ready'));
+        document.dispatchEvent(new Event('ready'));
+    }
 }
 
 async function submitPOST(e) {
@@ -27,7 +30,7 @@ async function submitGET(e) {
     let data = $(this).serialize();
 
     let action = $(this).attr('action');
-    if(!action) {
+    if (!action) {
         action = '?';
     }
 

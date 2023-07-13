@@ -238,6 +238,7 @@ class ProductController
         $product = $sync->getProductFromLink($link);
 
         if($product) {
+            //$this->model->storeProductSync($product);
             echo json_encode(["result" => $product, "status" => "success"]);
         }else{
             echo json_encode(["result" => null, "status" => "error", "message" => "No products found from the link"]);

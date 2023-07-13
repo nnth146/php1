@@ -29,13 +29,7 @@
                 <div class="flex flex--small-gap">
                     <a id="addproduct-btn" href="?action=create" class="ui primary button">Add product</a>
                     <a id="addproperty-btn" href="?action=properties" class="ui button">Add property</a>
-                    <button id="sync-btn" class="ui button <?php echo isset($_GET["progress"]) ? "loading" : "" ?>">Sync
-                        from Villatheme</button>
-                    <?php if (isset($_GET["progress"])): ?>
-                        <div class="progress">
-                            <?php echo $_GET["progress"] . "%" ?>
-                        </div>
-                    <?php endif; ?>
+                    <button id="sync-btn" class="ui button">Sync from Villatheme</button>
                 </div>
                 <div class="ui icon input">
                     <input type="text" name="search" placeholder="Search product"
@@ -237,23 +231,28 @@
             <div class="content">
                 <div class="sync__label">
                     <div>Find</div>
-                    <div id="find-loader" class="ui tiny inline loader"></div>
+                    <div id="find-loader" class="ui active tiny inline loader"></div>
                 </div>
                 <div id="find-progress" class="ui teal progress">
                     <div class="bar"></div>
-                    <div id="find-label" class="label"><div class="progress"></div></div>
+                    <div id="find-label" class="label">
+                        <div class="progress"></div>
+                    </div>
                 </div>
                 <div class="sync__label">
                     <p>Sync</p>
                     <div id="sync-loader" class="ui tiny inline loader"></div>
                 </div>
                 <div id="sync-progress" class="ui teal progress">
-                    <div class="bar"><div class="progress"></div></div>
+                    <div class="bar">
+                        <div class="progress"></div>
+                    </div>
                     <div id="sync-label" class="label"></div>
                 </div>
             </div>
             <div class="actions">
-                <button id="modal-sync-btn" class="positive ui approve button">Sync</button>
+                <button id="modal-reset-btn" class="ui approve button">Reset</button>
+                <button id="modal-sync-btn" class="ui green approve button">Sync</button>
                 <button id="modal-cancel-btn" class="ui cancel button">Cancel</button>
             </div>
         </div>
