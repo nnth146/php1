@@ -1,5 +1,4 @@
-import { readFileAsUrl, formatPrice, resolveSuffixPrice } from "./support.js";
-import { redirect, submitPOST } from "./live.js";
+import { readFileAsUrl, formatPrice, resolveSuffixPrice, loadModal, submitPOSTModal } from "./support.js";
 
 $(function () {
     ready();
@@ -7,7 +6,15 @@ $(function () {
     document.addEventListener('ready', ready);
 });
 
-function ready() {
+async function ready() {
+    $('#addproduct-btn').on('click', resolveProductModal);
+
+    $('a[id=editproduct-btn]').on('click', resolveProductModal);
+}
+
+function config() {
+    $('.ui.dropdown').dropdown();
+
     $('#feature_image').on("change", previewFeatureImage);
 
     $('#gallery').on("change", previewGallery);
@@ -20,7 +27,31 @@ function ready() {
 }
 
 function live() {
-    $("#product-form").on("submit", submitPOST);
+    $("#product-form").on("submit", async function (e) {
+        e.preventDefault();
+
+        submitPOSTModal($(this).attr('action'), new FormData(this), '#products-modal', config);
+    });
+
+    $('#cancel-btn').on('click', function (e) {
+        e.preventDefault();
+        $('#products-modal').modal('hide');
+    });
+}
+
+async function resolveProductModal(e) {
+    e.preventDefault();
+
+    await loadModal($(this).attr('href'), '#products-modal');
+
+    config();
+
+    $('#products-modal').modal({
+        detachable: false, onHidden: function () {
+            $('#filter-form').trigger('submit'); //update screen
+            $('#loader-modal').modal('hide');
+        },
+    }).modal('show');
 }
 
 async function previewFeatureImage() {

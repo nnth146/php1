@@ -109,7 +109,8 @@ class ProductController
 
                 $this->model->storeProduct($product);
 
-                redirect("/php1");
+                echo 1;
+                exit;
             } else {
                 $inputs = array_merge($inputs, $_POST);
 
@@ -171,7 +172,8 @@ class ProductController
 
                 $this->model->updateProduct($product);
 
-                redirect("/php1");
+                echo 1;
+                exit;
             } else {
                 foreach ($errors as $name => $error) {
                     $inputs["$name-error"] = $error;

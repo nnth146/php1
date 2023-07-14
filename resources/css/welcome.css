@@ -3,6 +3,7 @@
     margin: auto;
     margin-top: 2em;
     overflow: auto;
+    min-height: 100vh;
 }
 
 .title {
@@ -72,6 +73,10 @@
 
 .m-auto {
     margin: auto;
+}
+
+.sync-btn {
+    width: 13em;
 }
 
 .cursor-pointer {

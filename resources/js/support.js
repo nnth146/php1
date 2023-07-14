@@ -1,9 +1,11 @@
 export {
-    formatPrice, 
+    formatPrice,
     resolveSuffixPrice,
     readFileAsUrl,
     body,
-    send
+    send,
+    loadModal,
+    submitPOSTModal
 };
 
 function formatPrice() {
@@ -27,12 +29,11 @@ function formatPrice() {
 function resolveSuffixPrice() {
     let str = $(this).val();
     let length = str.length;
-    console.log(str);
 
     if (length > 0) {
         let lastChar = str.charAt(length - 1);
 
-        if(lastChar === ".") {
+        if (lastChar === ".") {
             str = str.slice(0, length - 1);
         }
 
@@ -65,17 +66,42 @@ function send(method, url, data = null) {
         xhttp.onload = function () {
             resolve(xhttp.responseText);
         };
-        
+
         xhttp.onerror = function () {
             reject(-1);
         };
 
         xhttp.open(method, url);
 
-        if(data) {
+        if (data) {
             xhttp.send(data);
-        }else {
+        } else {
             xhttp.send();
         }
     });
+}
+
+async function loadModal(url, modal) {
+    return new Promise(async (resolve) => {
+        let html = await send('GET', url);
+        $(modal).html(body(html));
+        resolve(html);
+    });
+}
+
+
+async function submitPOSTModal(url, data, modal, callback = null) {
+    let html = await send("POST", url, data);
+
+    if (html == 1) {
+        $(modal).modal('hide');
+        $('#loader-modal').modal('setting', 'closable', 'false').modal('show');
+        return;
+    }
+
+    $(modal).html(body(html));
+
+    if(callback) {
+        callback();
+    }
 }

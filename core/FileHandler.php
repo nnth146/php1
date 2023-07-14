@@ -73,7 +73,7 @@ class FileHandler
     public function store($paths) {
         $files = $this->getTmpFilePath();
 
-        if(!isset($paths) | !isset($files)) {
+        if(!isset($paths) || !isset($files)) {
             return false;
         }
 

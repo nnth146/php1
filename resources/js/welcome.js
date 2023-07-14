@@ -1,4 +1,4 @@
-import { body, formatPrice, resolveSuffixPrice, send } from "./support.js";
+import { formatPrice, resolveSuffixPrice, send } from "./support.js";
 import { redirect, submitPOST, submitGET } from "./live.js";
 
 $(function () {
@@ -29,7 +29,13 @@ function ready() {
 }
 
 function live() {
-    $('a').on('click', redirect);
+    $('a').each(function () {
+        let except = ['addproduct-btn', 'addproperty-btn', 'editproduct-btn'];
+
+        if (except.indexOf($(this).attr('id')) == -1) {
+            $(this).on('click', redirect);
+        }
+    });
 
     $('form[name=deleteproduct-form]').on('submit', submitPOST);
 
@@ -83,10 +89,10 @@ function resolveSync() {
     let sync;
 
     //restore state of sync
-    if(typeof Sync.instance === 'object') {
+    if (typeof Sync.instance === 'object') {
         sync = Sync.instance;
         sync.restore();
-    }else {
+    } else {
         sync = new Sync();
         Sync.instance = sync;
     }
@@ -136,7 +142,7 @@ class Sync {
         return this.total === this.current;
     }
 
-    setStatus (status) {
+    setStatus(status) {
         this.status = status;
         this.ui.setState(this.status, this);
     }
@@ -152,11 +158,17 @@ class Sync {
             this.links = await getProductLinks();
 
             this.setStatus('donefind');
+
+            this.run();
         }
-    }
+
+        if(this.enable) {
+            this.run();
+        }
+    } 
 
     async run() {
-        if(this.isCompleted) {
+        if (this.isCompleted) {
             $('#sync-modal').modal('hide');
             return;
         }
@@ -164,14 +176,14 @@ class Sync {
         if (this.links && this.links.length > 0 && this.enable && !this.isCompleted) {
             this.setStatus('syncing');
 
-            for (let link of this.links) {
+            for (let i = this.current; i < this.total; i++) {
                 if (this.stop) {
                     this.stop = false;
                     this.setStatus('stopped');
                     return;
                 }
 
-                let product = await getProductFromLink(link);
+                let product = await getProductFromLink(this.links[i]);
 
                 if (product) {
                     this.increment();
@@ -179,8 +191,10 @@ class Sync {
             }
 
             this.setStatus('donesync');
+
             $('#sync-modal').modal('hide');
-            this.update();
+
+            this.update(); //Cập nhật giao diện khi hoàn thành
         }
 
         if (this.status == 'syncing') {
@@ -188,7 +202,7 @@ class Sync {
             this.setStatus('stopping');
         }
     }
-    
+
     reset() {
         this.links = null;
         this.current = 0;
@@ -252,7 +266,8 @@ class SyncUI {
         this._setProgressLabel([this.find.progress], `${sync.total} products found`)
 
         $(this.find.progress).progress({ percent: '100' });
-        $(this.sync.progress).progress({ total: sync.total, value: sync.current });
+        $(this.sync.progress).progress({ total: sync.total });
+        this.incrementSyncProgress(sync.current);
     }
     finding() {
         this._activeLoader([this.find.loader]);

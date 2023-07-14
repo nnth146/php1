@@ -53,7 +53,8 @@ class PropertiesController
             }else {
                 $this->model->addCategory(["name" => $_POST["category"]]);
                 
-                redirect("/php1");
+                echo 1;
+                exit;
             }
         }
 
@@ -68,7 +69,8 @@ class PropertiesController
             }else{
                 $this->model->addTag(["name" => $_POST["tag"]]);
 
-                redirect("/php1");
+                echo 1;
+                exit;
             }
         }
 

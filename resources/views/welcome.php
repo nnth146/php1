@@ -29,7 +29,7 @@
                 <div class="flex flex--small-gap">
                     <a id="addproduct-btn" href="?action=create" class="ui primary button">Add product</a>
                     <a id="addproperty-btn" href="?action=properties" class="ui button">Add property</a>
-                    <button id="sync-btn" class="ui button">Sync from Villatheme</button>
+                    <div id="sync-btn" class="ui button sync-btn">Sync from Villatheme</div>
                 </div>
                 <div class="ui icon input">
                     <input type="text" name="search" placeholder="Search product"
@@ -255,6 +255,12 @@
                 <button id="modal-sync-btn" class="ui green approve button">Sync</button>
                 <button id="modal-cancel-btn" class="ui cancel button">Cancel</button>
             </div>
+        </div>
+
+        <div id="products-modal" class="ui large modal"></div>
+        <div id="properties-modal" class="ui tiny modal"></div>
+        <div id="loader-modal" class="ui basic modal">
+            <div class="ui loader"></div>
         </div>
 
         <div class="footer"></div>
