@@ -16,7 +16,7 @@ function config() {
 }
 
 function live() {
-    $('form[name=properties-form]').on('submit', async function (e) {
+    $('#properties-form').on('submit', function (e) {
         e.preventDefault();
 
         submitPOSTModal($(this).attr('action'), new FormData(this), '#properties-modal', config);

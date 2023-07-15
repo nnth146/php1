@@ -78,7 +78,7 @@ trait ProductController
             "prevPage" => $paginator->prevPage(),
             "categories" => $this->model->getCategories(),
             "tags" => $this->model->getTags(),
-            "noPageQuery" => http_build_query(array_diff_key($_GET, ["page" => ""])),
+            "noPageQuery" => http_build_query(array_diff_key($_GET, ["page" => "", "action" => ""])),
             "noActionQuery" => http_build_query(array_diff_key($_GET, ["action" => ""])),
             "page" => $paginator->getCurrentPage()
         ];

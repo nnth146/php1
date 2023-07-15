@@ -78,8 +78,6 @@ async function getProductFromLink(links) {
     return new Promise(async (resolve) => {
         let json = await send('POST', '?action=syncData', {links: links});
         let result = isJson(json) ? JSON.parse(json).result : null;
-        console.log(data);
-        console.log(json);
         resolve(result);
     });
 }

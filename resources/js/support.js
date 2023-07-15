@@ -72,18 +72,17 @@ function send(method, url, data = null, useFormData = false) {
             error: function () {
                 reject(-1);
             }
-        }
-        
+        };
+
         if(useFormData) {
-            settings.processData = useFormData;
-            settings.contentType = useFormData;
+            settings.processData = false;
+            settings.contentType = false;
             settings.enctype = 'multipart/form-data';
         }
-        
-        $.ajax(settings);
-    });
-}
 
+        $.ajax(settings);
+    })
+}
 async function loadModal(url, modal) {
     return new Promise(async (resolve) => {
         let html = await send('GET', url);

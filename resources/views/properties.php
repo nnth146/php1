@@ -16,7 +16,7 @@
     <div class="properties__main">
         <div class="ui header">Create Property</div>
         <div class="flex flex--col flex--medium-gap">
-            <form name="properties-form" action="?action=properties" method="post" class="ui form">
+            <form id="properties-form" action="?action=properties" method="post" class="ui form">
                 <div class="field">
                     <label>Category</label>
                     <div class="ui input w-full">
