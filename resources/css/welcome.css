@@ -2,7 +2,6 @@
     width: 95%;
     margin: auto;
     margin-top: 2em;
-    overflow: auto;
     min-height: 100vh;
 }
 
@@ -65,7 +64,8 @@
 
 .gallery {
     display: grid;
-    grid-template-columns: repeat(4, min-content);
+    width: 100%;
+    grid-template-columns: repeat(2, min-content);
     max-width: 60em;
     gap: 4px;
     overflow: hidden;
@@ -131,6 +131,22 @@
     margin-top: 1em;
 }
 
-.footer {
-    height: 4em;
+.scrolling.undetached.dimmable.dimmed > .dimmer {
+    overflow: auto;
+}
+
+.scrollable {
+    overflow: auto;
+    padding: 2px;
+}
+
+.mt-small {
+    margin-top: 1em;
+}
+
+.scrolling.undetached.dimmable .ui.scrolling.modal {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-top: 1rem !important;
 }

@@ -21,6 +21,9 @@ class Validator
     {
         $errors = [];
         foreach ($this->validates as $name => $rules) {
+            if(!key_exists($name, $this->inputs)) {
+                $this->inputs[$name] = null;
+            }
             $results = $this->excuteRule($this->inputs[$name], $rules, $name);
 
             if(count($results) > 0) {
@@ -131,6 +134,10 @@ trait Rule
     }
     public function image($files)
     {
+        if(!isset($files)) {
+            return false;
+        }
+
         $imageTypes = ["image/jpg", "image/jpeg", "image/png"];
         if(!is_array($files["type"])) {
             if(!file_exists($files["tmp_name"])){
@@ -156,6 +163,10 @@ trait Rule
     }
     public function filemax($files, $size)
     {
+        if(!isset($files)) {
+            return false;
+        }
+
         if(!is_array($files["size"])) {
             if(!file_exists($files["tmp_name"])){
                 return false;

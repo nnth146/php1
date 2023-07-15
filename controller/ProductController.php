@@ -5,7 +5,7 @@ require_once "core/Validator.php";
 require_once "model/ProductModel.php";
 require_once "core/SyncVillatheme.php";
 
-class ProductController
+trait ProductController
 {
     private $model;
     function __construct()
@@ -49,7 +49,7 @@ class ProductController
     {
         return $_GET[$name] ?? $fail;
     }
-    public function index()
+    public function index($json = false)
     {
         $conditions = [
             "field" => $this->gets("orderby", "date"),
@@ -85,7 +85,11 @@ class ProductController
 
         $inputs = array_merge($inputs, $_GET);
 
-        View::render("welcome", $inputs);
+        if($json) {
+            echo json_encode(["result" => "success", "html" => View::render("welcome", $inputs)]);
+        }else {
+            echo  View::render("welcome", $inputs);
+        }
     }
     public function create()
     {
@@ -109,7 +113,8 @@ class ProductController
 
                 $this->model->storeProduct($product);
 
-                echo 1;
+                $this->index(true);
+
                 exit;
             } else {
                 $inputs = array_merge($inputs, $_POST);
@@ -123,7 +128,7 @@ class ProductController
         $inputs["categories"] = $this->model->getCategories();
         $inputs["tags"] = $this->model->getTags();
 
-        View::render("products", $inputs);
+        echo json_encode(["result" => "error", "html" => View::render("products", $inputs)]);
     }
     public function edit()
     {
@@ -172,7 +177,7 @@ class ProductController
 
                 $this->model->updateProduct($product);
 
-                echo 1;
+                $this->index(true);
                 exit;
             } else {
                 foreach ($errors as $name => $error) {
@@ -181,7 +186,7 @@ class ProductController
             }
         }
 
-        View::render("products", $inputs);
+        echo json_encode(["result" => "error", "html" => View::render("products", $inputs)]);
     }
 
     public function destroy()
@@ -206,16 +211,7 @@ class ProductController
 
         $this->model->deleteProduct($product);
 
-        $queryString = htmlspecialchars(http_build_query(array_diff_key($_GET, ["action" => ""])));
-
-        if (empty($queryString)) {
-            $uri = "/php1";
-        } else {
-            $uri = "/php1?$queryString";
-        }
-        ;
-
-        redirect("$uri");
+        $this->index();
     }
     public function fetchLinks()
     {
@@ -225,9 +221,13 @@ class ProductController
     }
     public function syncData()
     {
-        $link = $_POST["link"] ?? '';
+        $links = $_POST["links"] ?? '';
 
-        if(empty($link)) {
+        if (isset($links) && !is_array($links)) {
+            $links = [$links];
+        }
+
+        if (empty($links)) {
             echo json_encode([
                 "result" => null,
                 "status" => "fail",
@@ -235,17 +235,19 @@ class ProductController
             ]);
             exit;
         }
-
+        $result = [];
         $sync = new SyncVillatheme();
-        $product = $sync->getProductFromLink($link);
 
-        if($product) {
+        foreach ($links as $link) {
+            $product = $sync->getProductFromLink($link);
             $this->model->storeProductSync($product);
-            echo json_encode(["result" => $product, "status" => "success"]);
-        }else{
-            echo json_encode(["result" => null, "status" => "error", "message" => "No products found from the link"]);
+            array_push($result, $product);
+        }
+
+        if ($result) {
+            echo json_encode(["result" => $result, "status" => "success"]);
+        } else {
+            echo json_encode(["result" => $result, "status" => "error", "message" => "No products found from the link"]);
         }
     }
 }
-
-call_user_func([new ProductController(), $method]);

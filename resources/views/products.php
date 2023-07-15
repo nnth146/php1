@@ -19,7 +19,8 @@
         <div class="ui header">
             <?php echo $inputs["header"] ?>
         </div>
-        <form id="product-form" action="<?php echo !isset($inputs['id']) ? '?action=create' : ('?action=edit&id=' . $inputs['id']) ?>"
+        <form id="product-form"
+            action="<?php echo !isset($inputs['id']) ? '?action=create' : ('?action=edit&id=' . $inputs['id']) ?>"
             class="ui form" method="post" enctype="multipart/form-data">
             <div class="field">
                 <label>Product name</label>

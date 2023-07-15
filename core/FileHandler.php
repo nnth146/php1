@@ -21,7 +21,7 @@ class FileHandler
     }
     protected function createPath($tmp_name, $name)
     {
-        if (file_exists($tmp_name)) {
+        if (file_exists($tmp_name) || (isset($this->files['https']) && $this->files['https'])) {
             $filename = pathinfo($name, PATHINFO_FILENAME);
             $extension = pathinfo($name, PATHINFO_EXTENSION);
             $target_file = $this->dir . $filename . "_uid_" . uniqid() . ".$extension";
@@ -87,16 +87,13 @@ class FileHandler
         $result = true;
 
         for($i = 0; $i < $quantity; $i++) {
-            if($this->isCopy($files[$i])) {
-                $result = copy($files[$i], $paths[$i]) && $result;
+            if(isset($this->files['https']) && $this->files['https']) {
+                $result = file_put_contents($paths[$i], $files[$i]) && $result;
                 continue;
             }
             $result = move_uploaded_file($files[$i], $paths[$i]) && $result;
         }
 
         return $result;
-    }
-    private function isCopy($tmp) {
-        return count(explode("/", $tmp)) > 1;
     }
 }

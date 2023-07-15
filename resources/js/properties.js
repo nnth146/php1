@@ -1,4 +1,5 @@
-import { loadModal, submitPOSTModal } from "./support.js";
+import { loadModal } from "./support.js";
+import { submitPOSTModal } from "./live.js";
 
 $(async function () {
     ready();
@@ -7,7 +8,7 @@ $(async function () {
 });
 
 function ready() {
-    $('#addproperty-btn').on('click', resolvePropertyModal);
+    $('#addproperty-btn').on('click', openPropertyModal);
 }
 
 function config() {
@@ -27,17 +28,14 @@ function live() {
     });
 }
 
-async function resolvePropertyModal(e) {
+async function openPropertyModal(e) {
     e.preventDefault();
 
-    await loadModal($(this).attr('href'), '#properties-modal');
+    if ($('#properties-modal').is(':empty')) {
+        await loadModal($(this).attr('href'), '#properties-modal');
 
-    config();
+        config();
+    }
 
-    $('#properties-modal').modal({
-        detachable: false, onHidden: function () {
-            $('#filter-form').trigger('submit'); //update screen
-            $('#loader-modal').modal('hide');
-        }
-    }).modal('show');
+    $('#properties-modal').modal('show');
 }

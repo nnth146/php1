@@ -5,7 +5,8 @@ export {
     body,
     send,
     loadModal,
-    submitPOSTModal
+    isJson,
+    resolveJson
 };
 
 function formatPrice() {
@@ -59,49 +60,53 @@ function body(html) {
     return found[0];
 }
 
-function send(method, url, data = null) {
+function send(method, url, data = null, useFormData = false) {
     return new Promise((resolve, reject) => {
-        let xhttp = new XMLHttpRequest();
-
-        xhttp.onload = function () {
-            resolve(xhttp.responseText);
-        };
-
-        xhttp.onerror = function () {
-            reject(-1);
-        };
-
-        xhttp.open(method, url);
-
-        if (data) {
-            xhttp.send(data);
-        } else {
-            xhttp.send();
+        let settings = {
+            type: method,
+            url: url,
+            data: data,
+            success: function (response) {
+                resolve(response);
+            },
+            error: function () {
+                reject(-1);
+            }
         }
+        
+        if(useFormData) {
+            settings.processData = useFormData;
+            settings.contentType = useFormData;
+            settings.enctype = 'multipart/form-data';
+        }
+        
+        $.ajax(settings);
     });
 }
 
 async function loadModal(url, modal) {
     return new Promise(async (resolve) => {
         let html = await send('GET', url);
-        $(modal).html(body(html));
+
+        $(modal).html(body(resolveJson(html)));
+
         resolve(html);
     });
 }
 
+function isJson(str) {
+    try {
+        JSON.parse(str);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
-async function submitPOSTModal(url, data, modal, callback = null) {
-    let html = await send("POST", url, data);
-
-    if (html == 1) {
-        $(modal).modal('hide');
-        $('#loader-modal').modal('setting', 'closable', 'false').modal('show');
-        return;
+function resolveJson(result) {
+    if (isJson(result)) {
+        return JSON.parse(result).html;
     }
 
-    $(modal).html(body(html));
-
-    if(callback) {
-        callback();
-    }
+    return result;
 }

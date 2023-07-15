@@ -189,7 +189,7 @@ class ProductModel
 
         $featureImage = $this->resolveFileFromUrl($product["feature_image-src"]);
 
-        $gallery = ["name" => [], "tmp_name" => []];
+        $gallery = ["name" => [], "tmp_name" => [], "https" => true];
 
         foreach ($product["gallery-src"] as $url) {
             $file = $this->resolveFileFromUrl($url);
@@ -213,25 +213,7 @@ class ProductModel
             $this->storeProduct($product);
         }
 
-        $this->unlinkTmpFile($featureImage["tmp_name"], $gallery["tmp_name"]);
-
         return true;
-    }
-    protected function unlinkTmpFile(...$parameters)
-    {
-        foreach ($parameters as $files) {
-            if (empty($files)) {
-                return false;
-            }
-
-            if (!is_array($files)) {
-                $files = [$files];
-            }
-
-            foreach ($files as $file) {
-                unlink($file);
-            }
-        }
     }
     protected function getFileNameFromUrl($url)
     {
@@ -246,13 +228,7 @@ class ProductModel
             return null;
         }
 
-        $tmp = "tmp/tmp" . uniqid();
-
-        if (!file_put_contents($tmp, $file)) {
-            return false;
-        }
-
-        return ["name" => $this->getFileNameFromUrl($url), "tmp_name" => $tmp];
+        return ["name" => $this->getFileNameFromUrl($url), "tmp_name" => $file, "https" => true];
     }
     public function storeProduct($product)
     {

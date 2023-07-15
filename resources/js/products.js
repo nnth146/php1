@@ -1,4 +1,5 @@
-import { readFileAsUrl, formatPrice, resolveSuffixPrice, loadModal, submitPOSTModal } from "./support.js";
+import { readFileAsUrl, formatPrice, resolveSuffixPrice, loadModal } from "./support.js";
+import { submitPOSTModal } from "./live.js";
 
 $(function () {
     ready();
@@ -7,9 +8,9 @@ $(function () {
 });
 
 async function ready() {
-    $('#addproduct-btn').on('click', resolveProductModal);
+    $('#addproduct-btn').on('click', openAddProductModal);
 
-    $('a[id=editproduct-btn]').on('click', resolveProductModal);
+    $('a[id=editproduct-btn]').on('click', openEditProductModal);
 }
 
 function config() {
@@ -27,7 +28,7 @@ function config() {
 }
 
 function live() {
-    $("#product-form").on("submit", async function (e) {
+    $("form[id=product-form]").on("submit", async function (e) {
         e.preventDefault();
 
         submitPOSTModal($(this).attr('action'), new FormData(this), '#products-modal', config);
@@ -39,19 +40,26 @@ function live() {
     });
 }
 
-async function resolveProductModal(e) {
+async function openAddProductModal(e) {
     e.preventDefault();
 
-    await loadModal($(this).attr('href'), '#products-modal');
+    if ($('#products-modal').is(':empty')) {
+        await loadModal($(this).attr('href'), '#products-modal');
+
+        config();
+    }
+
+    $('#products-modal').modal('show');
+}
+
+async function openEditProductModal(e) {
+    e.preventDefault();
+
+    await loadModal($(this).attr('href'), '#editproducts-modal');
 
     config();
 
-    $('#products-modal').modal({
-        detachable: false, onHidden: function () {
-            $('#filter-form').trigger('submit'); //update screen
-            $('#loader-modal').modal('hide');
-        },
-    }).modal('show');
+    $('#editproducts-modal').modal('show');
 }
 
 async function previewFeatureImage() {

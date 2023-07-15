@@ -31,13 +31,13 @@ switch ($action) {
     case "edit":
     case "fetchLinks":
     case "syncData":
-        route("ProductController", $action);
+        route("Controller", $action);
         break;
     case "delete":
-        route("ProductController", "destroy");
+        route("Controller", "destroy");
         break;
     case "properties":
-        route("PropertiesController", "create");
+        route("Controller", "createProperties");
         break;
     default:
         require_once "resources/views/404.php";

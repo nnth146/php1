@@ -98,99 +98,101 @@
             </div>
         </form>
 
-        <table class="ui celled table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Product name</th>
-                    <th>SKU</th>
-                    <th>Price</th>
-                    <th>Feature Image</th>
-                    <th>Gallery</th>
-                    <th>Categories</th>
-                    <th>Tags</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (isset($inputs["products"]) && is_array($inputs["products"])): ?>
-                    <?php foreach ($inputs["products"] as $product): ?>
-                        <tr>
-                            <td data-label="Date">
-                                <?php echo $product["date"] ?>
-                            </td>
-                            <td data-label="Product name">
-                                <?php echo $product["name"] ?>
-                            </td>
-                            <td data-label="SKU">
-                                <?php echo $product["sku"] ?>
-                            </td>
-                            <td data-label="Price">
-                                <?php echo "$" . number_format(((float) $product["price"]), 2); ?>
-                            </td>
-                            <td data-label="Feature Image">
-                                <?php if (!empty($product["feature_image"])): ?>
-                                    <img src="<?php echo $product["feature_image"] ?>" class="ui small image m-auto">
-                                <?php endif ?>
-                            </td>
-                            <td data-label="Gallery">
-                                <div class="gallery">
-                                    <?php if (isset($product["gallery"])): ?>
-                                        <?php $gallery = explode("|", $product["gallery"]); ?>
-                                        <?php foreach ($gallery as $url): ?>
-                                            <img class="ui tiny image" src="<?php echo $url; ?>" alt="No Image">
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                            <td data-label="Categories">
-                                <?php if (isset($product["categories"])): ?>
-                                    <?php echo $product["categories"]; ?>
-                                <?php endif ?>
-                            </td>
-                            <td data-label="Tags">
-                                <?php if (isset($product["tags"])): ?>
-                                    <?php echo $product["tags"]; ?>
-                                <?php endif ?>
-                            </td>
-                            <td data-label="Action">
-                                <div class="flex flex--gap-4px">
-                                    <a id="editproduct-btn" href="<?php echo '/php1?action=edit&id=' . $product["id"] ?>">
-                                        <svg class="small" xmlns="http://www.w3.org/2000/svg" height="1em"
-                                            viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
-                                            <path
-                                                d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z" />
-                                        </svg>
-                                    </a>
-                                    <form name="deleteproduct-form"
-                                        action="<?php echo "?action=delete" . (empty($inputs["noActionQuery"]) ? $inputs["noActionQuery"] : "&" . $inputs["noActionQuery"]); ?>"
-                                        method="post">
-                                        <input type="text" name="id" value="<?php echo $product['id'] ?>" hidden>
-                                        <div name="delete-btn" class="cursor-pointer">
+        <div class="scrollable mt-small">
+            <table class="ui celled table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Product name</th>
+                        <th>SKU</th>
+                        <th>Price</th>
+                        <th>Feature Image</th>
+                        <th>Gallery</th>
+                        <th>Categories</th>
+                        <th>Tags</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (isset($inputs["products"]) && is_array($inputs["products"])): ?>
+                        <?php foreach ($inputs["products"] as $product): ?>
+                            <tr>
+                                <td data-label="Date">
+                                    <?php echo $product["date"] ?>
+                                </td>
+                                <td data-label="Product name">
+                                    <?php echo $product["name"] ?>
+                                </td>
+                                <td data-label="SKU">
+                                    <?php echo $product["sku"] ?>
+                                </td>
+                                <td data-label="Price">
+                                    <?php echo "$" . number_format(((float) $product["price"]), 2); ?>
+                                </td>
+                                <td data-label="Feature Image">
+                                    <?php if (!empty($product["feature_image"])): ?>
+                                        <img src="<?php echo $product["feature_image"] ?>" class="ui small image m-auto">
+                                    <?php endif ?>
+                                </td>
+                                <td data-label="Gallery">
+                                    <div class="gallery">
+                                        <?php if (isset($product["gallery"])): ?>
+                                            <?php $gallery = explode("|", $product["gallery"]); ?>
+                                            <?php foreach ($gallery as $url): ?>
+                                                <img class="ui tiny image" src="<?php echo $url; ?>" alt="No Image">
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td data-label="Categories">
+                                    <?php if (isset($product["categories"])): ?>
+                                        <?php echo $product["categories"]; ?>
+                                    <?php endif ?>
+                                </td>
+                                <td data-label="Tags">
+                                    <?php if (isset($product["tags"])): ?>
+                                        <?php echo str_replace(',', ', ', $product["tags"]); ?>
+                                    <?php endif ?>
+                                </td>
+                                <td data-label="Action">
+                                    <div class="flex flex--gap-4px">
+                                        <a id="editproduct-btn" href="<?php echo '?action=edit&id=' . $product["id"] ?>">
                                             <svg class="small" xmlns="http://www.w3.org/2000/svg" height="1em"
-                                                viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                                viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
                                                 <path
-                                                    d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                                                    d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z" />
                                             </svg>
-                                        </div>
-                                        <div class="ui mini modal">
-                                            <div class="header">Notification</div>
-                                            <div class="content">
-                                                <p>Are you sure delete product?</p>
+                                        </a>
+                                        <form name="deleteproduct-form"
+                                            action="<?php echo "?action=delete" . (empty($inputs["noActionQuery"]) ? $inputs["noActionQuery"] : "&" . $inputs["noActionQuery"]); ?>"
+                                            method="post">
+                                            <input type="text" name="id" value="<?php echo $product['id'] ?>" hidden>
+                                            <div name="delete-btn" class="cursor-pointer">
+                                                <svg class="small" xmlns="http://www.w3.org/2000/svg" height="1em"
+                                                    viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                                    <path
+                                                        d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                                                </svg>
                                             </div>
-                                            <div class="actions">
-                                                <div class="negative ui button">No</div>
-                                                <button class="positive ui cancel button">Yes</button>
+                                            <div class="ui mini modal">
+                                                <div class="header">Notification</div>
+                                                <div class="content">
+                                                    <p>Are you sure delete product?</p>
+                                                </div>
+                                                <div class="actions">
+                                                    <div class="negative ui button">No</div>
+                                                    <button class="positive ui cancel button">Yes</button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
 
 
 
@@ -257,11 +259,10 @@
             </div>
         </div>
 
-        <div id="products-modal" class="ui large modal"></div>
+        <!-- Products -->
+        <div id="products-modal" class="ui container large modal"></div>
+        <div id="editproducts-modal" class="ui container large modal"></div>
         <div id="properties-modal" class="ui tiny modal"></div>
-        <div id="loader-modal" class="ui basic modal">
-            <div class="ui loader"></div>
-        </div>
 
         <div class="footer"></div>
     </div>

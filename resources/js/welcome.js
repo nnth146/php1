@@ -1,4 +1,4 @@
-import { formatPrice, resolveSuffixPrice, send } from "./support.js";
+import { formatPrice, isJson, resolveSuffixPrice, send } from "./support.js";
 import { redirect, submitPOST, submitGET } from "./live.js";
 
 $(function () {
@@ -74,14 +74,13 @@ async function getProductLinks() {
     });
 }
 
-async function getProductFromLink(link) {
+async function getProductFromLink(links) {
     return new Promise(async (resolve) => {
-        let data = new FormData();
-        data.set('link', link);
-
-        let json = await send('POST', '?action=syncData', data);
-        let product = JSON.parse(json).result;
-        resolve(product);
+        let json = await send('POST', '?action=syncData', {links: links});
+        let result = isJson(json) ? JSON.parse(json).result : null;
+        console.log(data);
+        console.log(json);
+        resolve(result);
     });
 }
 
@@ -176,17 +175,21 @@ class Sync {
         if (this.links && this.links.length > 0 && this.enable && !this.isCompleted) {
             this.setStatus('syncing');
 
-            for (let i = this.current; i < this.total; i++) {
+            let limit = 5;
+
+            for (let i = this.current; i < this.total; i += limit) {
                 if (this.stop) {
                     this.stop = false;
                     this.setStatus('stopped');
                     return;
                 }
 
-                let product = await getProductFromLink(this.links[i]);
+                let links = this.links.slice(i, i + limit);
 
-                if (product) {
-                    this.increment();
+                let products = await getProductFromLink(links);
+
+                if (products) {
+                    this.increment(products.length);
                 }
             }
 
@@ -210,8 +213,8 @@ class Sync {
         this.setStatus('rest');
     }
 
-    increment() {
-        this.current++;
+    increment(value) {
+        this.current += value;
         this.ui.incrementSyncProgress(this.current);
     }
 
@@ -274,6 +277,7 @@ class SyncUI {
         this._setProgressLabel([this.find.progress], 'Please wait to find products...');
 
         $(this.button.reset).hide();
+        $(this.button.cancel).hide();
     }
     donefind(sync) {
         this._deactiveLoader([this.find.loader]);
@@ -283,6 +287,7 @@ class SyncUI {
         $(this.sync.progress).progress({ total: sync.total, value: 0 });
 
         $(this.button.reset).show();
+        $(this.button.cancel).show();
     }
     syncing() {
         this._activeLoader([this.sync.loader]);
@@ -290,6 +295,7 @@ class SyncUI {
         this._setStateButton(this.button.sync, 'running');
 
         $(this.button.reset).hide();
+        $(this.button.cancel).hide();
 
         $(this.button.main).addClass('loading');
     }
@@ -299,6 +305,7 @@ class SyncUI {
         this._setStateButton(this.button.sync, 'done');
 
         $(this.button.reset).show();
+        $(this.button.cancel).show();
 
         $(this.button.main).removeClass('loading');
     }
@@ -312,12 +319,12 @@ class SyncUI {
         this._setStateButton(this.button.sync, 'stopping');
 
         $(this.button.reset).show();
+        $(this.button.cancel).show();
 
         $(this.button.main).removeClass('loading');
     }
     incrementSyncProgress(value) {
         $(this.sync.progress).progress('set progress', value);
-        $(this.button.main).text($(this.sync.progress).progress('get percent') + '%');
     }
     _deactiveLoader(arr) {
         for (let selector of arr) {

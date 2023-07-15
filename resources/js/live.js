@@ -1,14 +1,14 @@
-import { body, send } from "./support.js";
+import { body, send, resolveJson } from "./support.js";
 
-export { redirect, submitPOST, submitGET };
+export { redirect, submitPOST, submitGET, submitPOSTModal };
 
 async function redirect(e) {
     e.preventDefault();
-    
-    if ($(this).attr('href')) {
-        let html = await send('GET', $(this).attr('href'));
 
-        $('body').html(body(html));
+    if ($(this).attr('href')) {
+        let result = await send('GET', $(this).attr('href'));
+
+        $('body').html(body(resolveJson(result)));
 
         document.dispatchEvent(new Event('ready'));
     }
@@ -18,11 +18,38 @@ async function submitPOST(e) {
     e.preventDefault();
     let data = new FormData(this);
 
-    let html = await send("POST", $(this).attr('action'), data);
+    let result = await send("POST", $(this).attr('action'), data, true);
 
-    $('body').html(body(html));
+    $('body').html(body(resolveJson(result)));
 
     document.dispatchEvent(new Event('ready'));
+}
+
+async function submitPOSTModal(url, data, modal, callback = null) {
+    let result = await send("POST", url, data, true);
+
+    let obj = JSON.parse(result);
+
+    if (obj.result == 'success') {
+        await new Promise((resolve) => {
+            $(modal).modal({
+                onHidden: function () {
+                    resolve('hide');
+                }
+            }).modal('hide');
+        });
+
+        $('body').html(obj.html);
+
+        document.dispatchEvent(new Event('ready'));
+        return;
+    } else {
+        $(modal).html(body(obj.html));
+    }
+
+    if (callback) {
+        callback();
+    }
 }
 
 async function submitGET(e) {
@@ -34,9 +61,9 @@ async function submitGET(e) {
         action = '?';
     }
 
-    let html = await send("GET", action + data);
+    let result = await send("GET", action + data);
 
-    $('body').html(body(html));
+    $('body').html(body(resolveJson(result)));
 
     document.dispatchEvent(new Event('ready'));
 }

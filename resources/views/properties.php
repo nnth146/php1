@@ -19,9 +19,8 @@
             <form name="properties-form" action="?action=properties" method="post" class="ui form">
                 <div class="field">
                     <label>Category</label>
-                    <div class="ui action input w-full">
+                    <div class="ui input w-full">
                         <input type="text" name="category" placeholder="Enter category...">
-                        <button class="positive ui button">Add</button>
                     </div>
                     <div class="properties__input__error">
                         <?php if (isset($inputs["category-error"]) && is_array($inputs["category-error"])): ?>
@@ -33,13 +32,10 @@
                         <?php endif; ?>
                     </div>
                 </div>
-            </form>
-            <form name="properties-form" action="?action=properties" method="post" class="ui form">
                 <div class="field">
                     <label>Tag</label>
-                    <div class="ui action input w-full">
+                    <div class="ui input w-full">
                         <input type="text" name="tag" placeholder="Enter Tag...">
-                        <button class="positive ui button">Add</button>
                     </div>
                     <div class="properties__input__error">
                         <?php if (isset($inputs["tag-error"]) && is_array($inputs["tag-error"])): ?>
@@ -51,8 +47,11 @@
                         <?php endif; ?>
                     </div>
                 </div>
+                <div class="field">
+                    <button class="positive ui button w-fit">Add</button>
+                    <a id="back-btn" href="/php1/" class="negative ui button w-fit">Back</a>
+                </div>
             </form>
-            <a id="back-btn" href="/php1/" class="negative ui button w-fit">Back</a>
         </div>
     </div>
 </body>
