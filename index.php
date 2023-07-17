@@ -23,7 +23,7 @@ function route($controller, $method)
     require_once "controller/$controller.php";
 }
 
-$action = $_GET["action"] ?? "index";
+$action = $_REQUEST["action"] ?? "index";
 
 switch ($action) {
     case "index":

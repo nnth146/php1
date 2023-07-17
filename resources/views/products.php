@@ -143,7 +143,7 @@
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
-                    <div class="preview" id="gallery-preview">
+                    <div class="products__preview" id="gallery-preview">
                         <?php if (isset($inputs["gallery"]) && is_array($inputs["gallery"])): ?>
                             <?php foreach ($inputs["gallery"] as $url): ?>
                                 <img class="ui small image" src="<?php echo "/php1/" . $url; ?>">

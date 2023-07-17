@@ -1,11 +1,15 @@
-import { loadModal } from "./support.js";
 import { submitPOSTModal } from "./live.js";
+import { getHtml, body } from "./support.js";
 
 $(async function () {
     ready();
 
     document.addEventListener('ready', ready);
 });
+
+class AddPropertiesModal {
+    static html;
+}
 
 function ready() {
     $('#addproperty-btn').on('click', openPropertyModal);
@@ -31,11 +35,13 @@ function live() {
 async function openPropertyModal(e) {
     e.preventDefault();
 
-    if ($('#properties-modal').is(':empty')) {
-        await loadModal($(this).attr('href'), '#properties-modal');
-
-        config();
+    if(!AddPropertiesModal.html) {
+        AddPropertiesModal.html = await getHtml($(this).attr('href'));
     }
+
+    $('#properties-modal').html(body(AddPropertiesModal.html));
+
+    config();
 
     $('#properties-modal').modal('show');
 }

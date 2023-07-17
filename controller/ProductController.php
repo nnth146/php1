@@ -49,7 +49,7 @@ trait ProductController
     {
         return $_GET[$name] ?? $fail;
     }
-    public function index($json = false)
+    public function index($json = false, $parameters = null)
     {
         $conditions = [
             "field" => $this->gets("orderby", "date"),
@@ -67,7 +67,6 @@ trait ProductController
 
         if ($this->gets("page", false) && !$paginator->isCurrentPage($this->gets("page"))) {
             $_GET["page"] = $paginator->getCurrentPage();
-            redirect("/php1", http_build_query($_GET));
         }
 
         $inputs = [
@@ -85,10 +84,10 @@ trait ProductController
 
         $inputs = array_merge($inputs, $_GET);
 
-        if($json) {
-            echo json_encode(["result" => "success", "html" => View::render("welcome", $inputs)]);
-        }else {
-            echo  View::render("welcome", $inputs);
+        if ($json) {
+            echo json_encode(["result" => "success", "html" => View::render("welcome", $inputs), "parameters" => $parameters]);
+        } else {
+            echo View::render("welcome", $inputs);
         }
     }
     public function create()
@@ -141,18 +140,7 @@ trait ProductController
             return;
         }
 
-        $inputs = array_merge($inputs, [
-            "id" => $oldProduct["id"],
-            "name" => $_POST["name"] ?? $oldProduct["name"],
-            "sku" => $_POST["sku"] ?? $oldProduct["sku"],
-            "price" => $_POST["price"] ?? $oldProduct["price"],
-            "category" => $_POST["category"] ?? explode(",", $oldProduct["categoryIds"]),
-            "tag" => $_POST["tag"] ?? explode(",", $oldProduct["tagIds"]),
-            "feature_image" => $oldProduct["feature_image"],
-            "gallery" => isset($oldProduct["gallery"]) ? explode("|", $oldProduct["gallery"]) : null,
-            "categories" => $this->model->getCategories(),
-            "tags" => $this->model->getTags()
-        ]);
+        $inputs = array_merge($inputs, $this->createEditInputs($oldProduct));
 
         if (count($_POST) > 0) {
             $validator = $this->createValidator();
@@ -177,7 +165,19 @@ trait ProductController
 
                 $this->model->updateProduct($product);
 
-                $this->index(true);
+                $updated = $this->model->getProductFromId($product["id"]);
+                $newInputs = $this->createEditInputs($updated);
+                $newInputs["header"] = "Edit Product";
+
+                $updated["gallery"] = isset($updated["gallery"]) ? explode("|", $updated["gallery"]) : null;
+
+                echo json_encode([
+                    "result" => "success",
+                    "html" => View::render("product", ["product" => $updated]),
+                    "action" => "edit",
+                    "id" => $oldProduct["id"],
+                    "modal" => View::render("products", $newInputs)
+                ]);
                 exit;
             } else {
                 foreach ($errors as $name => $error) {
@@ -187,6 +187,22 @@ trait ProductController
         }
 
         echo json_encode(["result" => "error", "html" => View::render("products", $inputs)]);
+    }
+
+    function createEditInputs($oldProduct)
+    {
+        return [
+            "id" => $oldProduct["id"],
+            "name" => $_POST["name"] ?? $oldProduct["name"],
+            "sku" => $_POST["sku"] ?? $oldProduct["sku"],
+            "price" => $_POST["price"] ?? $oldProduct["price"],
+            "category" => $_POST["category"] ?? explode(",", $oldProduct["categoryIds"]),
+            "tag" => $_POST["tag"] ?? explode(",", $oldProduct["tagIds"]),
+            "feature_image" => $oldProduct["feature_image"],
+            "gallery" => isset($oldProduct["gallery"]) ? explode("|", $oldProduct["gallery"]) : null,
+            "categories" => $this->model->getCategories(),
+            "tags" => $this->model->getTags()
+        ];
     }
 
     public function destroy()

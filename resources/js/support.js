@@ -4,9 +4,9 @@ export {
     readFileAsUrl,
     body,
     send,
-    loadModal,
     isJson,
-    resolveJson
+    resolveJson,
+    getHtml
 };
 
 function formatPrice() {
@@ -83,11 +83,12 @@ function send(method, url, data = null, useFormData = false) {
         $.ajax(settings);
     })
 }
-async function loadModal(url, modal) {
-    return new Promise(async (resolve) => {
-        let html = await send('GET', url);
 
-        $(modal).html(body(resolveJson(html)));
+function getHtml(url) {
+    return new Promise(async (resolve) => {
+        let json = await send("GET", url);
+
+        let html = isJson(json) ? JSON.parse(json).html : '';
 
         resolve(html);
     });

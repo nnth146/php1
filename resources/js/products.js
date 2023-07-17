@@ -1,5 +1,6 @@
-import { readFileAsUrl, formatPrice, resolveSuffixPrice, loadModal } from "./support.js";
 import { submitPOSTModal } from "./live.js";
+import { readFileAsUrl, formatPrice, resolveSuffixPrice, send, body, getHtml } from "./support.js";
+export { EditProductModal }
 
 $(function () {
     ready();
@@ -7,10 +8,14 @@ $(function () {
     document.addEventListener('ready', ready);
 });
 
-async function ready() {
-    $('#addproduct-btn').on('click', openAddProductModal);
+class AddProductModal {
+    static html;
+}
 
-    $('a[id=editproduct-btn]').on('click', openEditProductModal);
+function ready() {
+    $('#addproduct-btn').on('click', openAddModal);
+
+    $('a[id=editproduct-btn]').on('click', openEditModal());
 }
 
 function config() {
@@ -31,7 +36,7 @@ function live() {
     $("form[id=product-form]").on("submit", async function (e) {
         e.preventDefault();
 
-        submitPOSTModal($(this).attr('action'), new FormData(this), '#products-modal', config);
+        submitPOSTModal($(this).attr('action'), new FormData(this), "#products-modal", config);
     });
 
     $('#cancel-btn').on('click', function (e) {
@@ -40,26 +45,45 @@ function live() {
     });
 }
 
-async function openAddProductModal(e) {
+async function openAddModal(e) {
     e.preventDefault();
 
-    if ($('#products-modal').is(':empty')) {
-        await loadModal($(this).attr('href'), '#products-modal');
-
-        config();
+    if (!AddProductModal.html) {
+        AddProductModal.html = await getHtml($('#addproduct-btn').attr('href'));
     }
+
+    $('#products-modal').html(body(AddProductModal.html));
+
+    config();
 
     $('#products-modal').modal('show');
 }
 
-async function openEditProductModal(e) {
-    e.preventDefault();
+class EditProductModal {
+    static html;
+}
 
-    await loadModal($(this).attr('href'), '#editproducts-modal');
+function openEditModal() {
+    let url;
+    return async function (e) {
+        e.preventDefault();
 
-    config();
+        let currentUrl = $(this).attr('href');
 
-    $('#editproducts-modal').modal('show');
+        if (!url) {
+            url = currentUrl;
+            EditProductModal.html = await getHtml(url);
+        } else if (url != currentUrl) {
+            url = currentUrl;
+            EditProductModal.html = await getHtml(url);
+        }
+
+        $('#products-modal').html(body(EditProductModal.html));
+
+        config();
+
+        $('#products-modal').modal('show');
+    }
 }
 
 async function previewFeatureImage() {

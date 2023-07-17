@@ -159,7 +159,7 @@ class Sync {
             this.run();
         }
 
-        if(this.enable) {
+        if(this.enable && !this.isCompleted) {
             this.run();
         }
     } 

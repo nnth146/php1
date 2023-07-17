@@ -1,3 +1,4 @@
+import { EditProductModal } from "./products.js";
 import { body, send, resolveJson } from "./support.js";
 
 export { redirect, submitPOST, submitGET, submitPOSTModal };
@@ -25,7 +26,7 @@ async function submitPOST(e) {
     document.dispatchEvent(new Event('ready'));
 }
 
-async function submitPOSTModal(url, data, modal, callback = null) {
+async function submitPOSTModal(url, data, modal, config) {
     let result = await send("POST", url, data, true);
 
     let obj = JSON.parse(result);
@@ -39,16 +40,27 @@ async function submitPOSTModal(url, data, modal, callback = null) {
             }).modal('hide');
         });
 
+        if (obj.action == "edit") {
+            let fields = ["Product name", "SKU", "Price", "Feature Image", "Gallery", "Categories", "Tags"]
+            let tr = $(`tr[id="${obj.id}"]`);
+            for (let field of fields) {
+                let html = obj.html.match(new RegExp(`<td.*?data-label=\"${field}\">([\\n\\S\\s]+?)<\/td>`))[1];
+                tr.find(`td[data-label="${field}"]`).html(html);
+            }
+
+            EditProductModal.html = obj.modal;
+
+            return;
+        }
+
         $('body').html(obj.html);
 
         document.dispatchEvent(new Event('ready'));
         return;
     } else {
         $(modal).html(body(obj.html));
-    }
 
-    if (callback) {
-        callback();
+        config();
     }
 }
 

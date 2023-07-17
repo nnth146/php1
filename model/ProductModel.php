@@ -162,6 +162,10 @@ class ProductModel
     }
     public function storeProductSync($product)
     {
+        if(empty($product["sku"])) {
+            $product["sku"] = uniqid();
+        }
+
         $properties = ["categories", "tags"];
 
         foreach ($properties as $property) {
@@ -361,7 +365,7 @@ class ProductModel
             );
         }
 
-        return true;
+        return $product;
     }
     private function updateProductSubTable($table, $columns, $values, $id)
     {

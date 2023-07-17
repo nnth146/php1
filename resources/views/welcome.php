@@ -116,7 +116,7 @@
                 <tbody>
                     <?php if (isset($inputs["products"]) && is_array($inputs["products"])): ?>
                         <?php foreach ($inputs["products"] as $product): ?>
-                            <tr>
+                            <tr id="<?php echo $product["id"] ?>">
                                 <td data-label="Date">
                                     <?php echo $product["date"] ?>
                                 </td>
@@ -199,7 +199,7 @@
         <?php if ($inputs["links"]): ?>
             <div class="pagination">
                 <?php if ($inputs["prevPage"] != $inputs["currentPage"]): ?>
-                    <a href="<?php echo "/php1?page=" . $inputs["prevPage"] . (empty($inputs["noPageQuery"]) ? $inputs["noPageQuery"] : "&" . $inputs["noPageQuery"]); ?>"
+                    <a href="<?php echo "?page=" . $inputs["prevPage"] . (empty($inputs["noPageQuery"]) ? $inputs["noPageQuery"] : "&" . $inputs["noPageQuery"]); ?>"
                         class="pagination__link pagination__link--move">
                         <svg xmlns="http://www.w3.org/2000/svg" height="1em"
                             viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
@@ -209,14 +209,14 @@
                     </a>
                 <?php endif; ?>
                 <?php foreach ($inputs["links"] as $link): ?>
-                    <?php $href = "/php1?page=$link" . (empty($inputs['noPageQuery']) ? $inputs['noPageQuery'] : '&' . $inputs['noPageQuery']) ?>
+                    <?php $href = "?page=$link" . (empty($inputs['noPageQuery']) ? $inputs['noPageQuery'] : '&' . $inputs['noPageQuery']) ?>
                     <a <?php echo $link != $inputs["currentPage"] ? "href=\"$href\"" : "" ?>
                         class="pagination__link <?php echo $link == $inputs["currentPage"] ? " pagination__link--active" : "" ?>">
                         <?php echo $link ?>
                     </a>
                 <?php endforeach ?>
                 <?php if ($inputs["nextPage"] != $inputs["currentPage"]): ?>
-                    <a href="<?php echo "/php1?page=" . $inputs["nextPage"] . (empty($inputs["noPageQuery"]) ? $inputs["noPageQuery"] : "&" . $inputs["noPageQuery"]); ?>"
+                    <a href="<?php echo "?page=" . $inputs["nextPage"] . (empty($inputs["noPageQuery"]) ? $inputs["noPageQuery"] : "&" . $inputs["noPageQuery"]); ?>"
                         class="pagination__link pagination__link--move">
                         <svg xmlns="http://www.w3.org/2000/svg" height="1em"
                             viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
@@ -227,7 +227,6 @@
                 <?php endif; ?>
             </div>
         <?php endif ?>
-
         <div id="sync-modal" class="ui mini modal">
             <div class="header">Sync Villatheme</div>
             <div class="content">
@@ -263,9 +262,7 @@
         <div id="products-modal" class="ui container large modal"></div>
         <div id="editproducts-modal" class="ui container large modal"></div>
         <div id="properties-modal" class="ui tiny modal"></div>
-
         <div class="footer"></div>
     </div>
 </body>
-
 </html>
