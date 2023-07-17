@@ -1,5 +1,5 @@
 import { EditProductModal } from "./products.js";
-import { body, send, resolveJson } from "./support.js";
+import { body, send, resolveJson, isJson } from "./support.js";
 
 export { redirect, submitPOST, submitGET, submitPOSTModal };
 
@@ -31,6 +31,7 @@ async function submitPOSTModal(url, data, modal, config) {
 
     let obj = JSON.parse(result);
 
+
     if (obj.result == 'success') {
         await new Promise((resolve) => {
             $(modal).modal({
@@ -43,6 +44,7 @@ async function submitPOSTModal(url, data, modal, config) {
         if (obj.action == "edit") {
             let fields = ["Product name", "SKU", "Price", "Feature Image", "Gallery", "Categories", "Tags"]
             let tr = $(`tr[id="${obj.id}"]`);
+
             for (let field of fields) {
                 let html = obj.html.match(new RegExp(`<td.*?data-label=\"${field}\">([\\n\\S\\s]+?)<\/td>`))[1];
                 tr.find(`td[data-label="${field}"]`).html(html);

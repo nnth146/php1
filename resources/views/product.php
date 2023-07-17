@@ -17,7 +17,8 @@
 <td data-label="Gallery">
     <div class="gallery">
         <?php if (isset($product["gallery"])): ?>
-            <?php foreach ($product["gallery"] as $url): ?>
+            <?php $gallery = explode("|", $product["gallery"]); ?>
+            <?php foreach ($gallery as $url): ?>
                 <img class="ui tiny image" src="<?php echo $url; ?>" alt="No Image">
             <?php endforeach; ?>
         <?php endif; ?>

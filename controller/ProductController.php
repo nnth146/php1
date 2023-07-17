@@ -168,8 +168,7 @@ trait ProductController
                 $updated = $this->model->getProductFromId($product["id"]);
                 $newInputs = $this->createEditInputs($updated);
                 $newInputs["header"] = "Edit Product";
-
-                $updated["gallery"] = isset($updated["gallery"]) ? explode("|", $updated["gallery"]) : null;
+                $newInputs["gallery"] = isset($updated["gallery"]) ? explode("|", $updated["gallery"]) : null;
 
                 echo json_encode([
                     "result" => "success",

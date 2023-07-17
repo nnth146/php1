@@ -10,13 +10,15 @@ class FileHandler
         $this->dir = $dir;
     }
     public static function unlink($files) {
-        if(!is_array($files)) {
+        if(!is_array($files) && file_exists($files)) {
             unlink($files);
             return;
         }
 
         foreach($files as $file) {
-            unlink($file);
+            if(file_exists($file)) {
+                unlink($file);
+            }
         }
     }
     protected function createPath($tmp_name, $name)
